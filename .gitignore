@@ -5,3 +5,4 @@
 *.dll
 .vscode
 build
+.DS_Store
