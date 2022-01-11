@@ -59,6 +59,18 @@ The [boost]() library is used throughout the course. To install it on a mac:
 ```bash
 brew install boost
 ```
+
+Additionally, the `CMakeLists.txt` file of each project needs to be updated to contain all necessary Boost library information:
+
+```cmake
+list(APPEND CMAKE_PREFIX_PATH /opt/homebrew)
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
+add_executable(main main.cpp)
+target_link_libraries(main ${Boost_LIBRARIES})
+```
+
 ### SOLID Design Principles
 
 SOLID Design Principles were introduced by Robert C. Martin (Uncle Bob), known also for the Agile Manifesto.

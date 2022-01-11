@@ -1,3 +1,12 @@
+/*
+ * From the Udemy course "Design Patterns in Modern C++"
+ * https://www.udemy.com/course/patterns-cplusplus/
+ * by Dmitri Nesteruk.
+ * 
+ * Single Responsibility Principle
+ * 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <string>
