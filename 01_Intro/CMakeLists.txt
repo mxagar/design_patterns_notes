@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.0)
+project(DS_01_Intro)
+
+set(SRC_DIR .)
+set(LIBS '')
+
+include_directories(${SRC_DIR})
+
+set (   SRC_FILES 
+        #SRP.cpp 
+    )
+
+list(APPEND CMAKE_PREFIX_PATH /opt/homebrew)
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
+# Compilation -> add_executable / add_library
+set (CMAKE_CXX_FLAGS "-std=c++14 -O0 -pedantic -Wall -Wfatal-errors -Wextra")
+# Linking -> target_link_libraries
+set (LDFLAGS "-std=c++14")
+
+# ./srp
+add_executable(srp SRP.cpp ${SRC_FILES})
+target_link_libraries(srp ${Boost_LIBRARIES})
+

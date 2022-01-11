@@ -1,0 +1,3 @@
+project(DesignPatterns)
+add_subdirectory(01_Intro)
+add_subdirectory(02_Builder_Pattern)
