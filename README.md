@@ -9,4 +9,4 @@ by Dmitri Nesteruk, and the following popular books:
 - "Design Patterns" (Addison Wesley), by Gamma, Helm, Johnson & Vlissides
 - "Design Patterns" (O'Reailly Head First), by Kathy Sierra and Bert Bates
 
-The file `DesignPatterns_Guide.md` contains all th enotes I made; additionally, there is a folder for each of the patterns with specific material.
+The file `DesignPatterns_Guide.md` contains all the notes I made; additionally, there is a folder for each of the patterns with specific material.

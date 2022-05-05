@@ -18,7 +18,6 @@ Overview of sections:
 1. Introduction: SOLID Design Principles
 2. Builder (Pattern)
 
-
 ## 1. Introduction: SOLID Design Principles
 
 Design Patterns are common and re-usable programming approaches that were popularized in the book of the same name (by "the gang of four": Gamma, Helm, Johnson & Vlissides).
