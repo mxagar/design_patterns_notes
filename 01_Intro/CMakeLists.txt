@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(DS_01_Intro)
+project(DP_01_Intro)
 
 set(SRC_DIR .)
 set(LIBS '')
