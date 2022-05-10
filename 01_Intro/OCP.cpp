@@ -24,6 +24,13 @@ struct Product
   Size size;
 };
 
+// Bad pattern: this product filter needs to be
+// modified/extendedin ternally every time we add
+// a new filter use case!
+// Instead, we should follow the Open-Closed Principle:
+// Open for extension, closed for modification.
+// That can be achieved by defining pure virtual class templates
+// that are inherited to create concrete filters.
 struct ProductFilter
 {
   typedef vector<Product*> Items;
@@ -58,19 +65,30 @@ struct ProductFilter
 
 template <typename T> struct AndSpecification;
 
+// Good pattern: Open-Closed Principle:
+// - open to extend by inheritance
+// - closed to be modified in its definition
+// We create virtual classes Specification & Filter
+// and they are inherited to be concrete filter(s)
+// and filtering specifications/conditions
 template <typename T> struct Specification
 {
   virtual ~Specification() = default;
   virtual bool is_satisfied(T* item) const = 0;
 
-  // new: breaks OCP if you add it post-hoc
+  // AndSpecification contains two specifications
+  // but it breaks OCP if you add it post-hoc
+  // thus, we need to define it outside
   /*AndSpecification<T> operator&&(Specification<T>&& other)
   {
     return AndSpecification<T>(*this, other);
   }*/
 };
 
-// new: 
+// AndSpecification contains two specifications.
+// In order to make it more compact when using a pair of specifications
+// we can define the && operator, which would return an AndSpecification
+// from two single Specifications
 template <typename T> AndSpecification<T> operator&&
   (const Specification<T>& first, const Specification<T>& second)
 {
@@ -122,6 +140,8 @@ struct SizeSpecification : Specification<Product>
   }
 };
 
+// AndSpecification contains two generic specifications,
+// both are checked
 template <typename T> struct AndSpecification : Specification<T>
 {
   const Specification<T>& first;
@@ -135,23 +155,25 @@ template <typename T> struct AndSpecification : Specification<T>
   }
 };
 
-// new:
-
 int main()
 {
+  // Products
   Product apple{"Apple", Color::green, Size::small};
   Product tree{"Tree", Color::green, Size::large};
   Product house{"House", Color::blue, Size::large};
 
+  // Vector of product pointers
   const vector<Product*> all { &apple, &tree, &house };
 
+  // Filter which follows the open-close principle
+  // with Filter and Specification
   BetterFilter bf;
   ColorSpecification green(Color::green);
   auto green_things = bf.filter(all, green);
   for (auto& x : green_things)
     cout << x->name << " is green\n";
 
-
+  // Two specifications
   SizeSpecification large(Size::large);
   AndSpecification<Product> green_and_large(green, large);
 
@@ -162,10 +184,10 @@ int main()
   for (auto& x : bf.filter(all, spec))
     cout << x->name << " is green and large\n";
 
-  // warning: the following will compile but will NOT work
+  // Warning: the following will compile but will NOT work
   // auto spec2 = SizeSpecification{Size::large} &&
   //              ColorSpecification{Color::blue};
 
-  getchar();
+  //getchar();
   return 0;
 }

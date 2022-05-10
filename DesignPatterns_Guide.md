@@ -125,4 +125,82 @@ Links:
 - [Static Members of a C++ Class](https://www.tutorialspoint.com/cplusplus/cpp_static_members.htm)
 - [Static functions outside classes](https://stackoverflow.com/questions/25724787/static-functions-outside-classes)
 
-### 1. Open-Closed Principle: `01_Intro/SRP.cpp`
+### 1. Open-Closed Principle: `01_Intro/OCP.cpp`
+
+The Open-Closed Principle states that the system should be 
+
+- open to extension (e.g., by inheritance),
+- but closed to modification, e.g., we don' change older code.
+
+That is achieved by creating template classes for everything we create and inheriting them on any new use case.
+
+The example used is a product filter: products have two properties `color` and `size` ddefine as `enums`,  and we want to filter them depending on those values. The first version of the filter is a series of functions like `filter_by_color()` nested in a `struct`; however, the `struct` needs to be changed/extended inside every time we define a new filter.
+
+With the OCP, we transform that to have two pure virtual classes: `Specification` and `Filter`. We inherit `Specification` for each particular property. All inherited `Specifications` will have the same checking function `is_satistifed()`. Then, a `BetterFilter` class is inherited which calls that function `is_satistifed()` of generic `Specifications`, which when used, can be any particular ones.
+
+```c++
+// --- BAD PATTERN
+
+struct ProductFilter
+{
+  typedef vector<Product*> Items;
+
+  Items by_color(Items items, const Color color)
+  {
+    Items result;
+    for (auto& i : items)
+      if (i->color == color)
+        result.push_back(i);
+    return result;
+  }
+
+  Items by_size(Items items, const Size size)
+  {
+    //...
+  }
+};
+
+// --- GOOD PATTERN
+// Alternative to the bad one
+// using the open-close principle
+
+template <typename T> struct Specification
+{
+  virtual ~Specification() = default;
+  virtual bool is_satisfied(T* item) const = 0;
+};
+
+template <typename T> struct Filter
+{
+  virtual vector<T*> filter(vector<T*> items,
+                            Specification<T>& spec) = 0;
+};
+
+struct BetterFilter : Filter<Product>
+{
+  vector<Product*> filter(vector<Product*> items, Specification<Product> &spec) override
+  {
+    vector<Product*> result;
+    for (auto& p : items)
+      if (spec.is_satisfied(p))
+        result.push_back(p);
+    return result;
+  }
+};
+
+struct ColorSpecification : Specification<Product>
+{
+  Color color;
+
+  ColorSpecification(Color color) : color(color) {}
+
+  bool is_satisfied(Product *item) const override {
+    return item->color == color;
+  }
+};
+
+```
+
+Other code pieces/elements:
+- `override`: it means it is overriding a virtual function from a base class; it appears after the function definition.
+- The class `AndSpecification` is also defined with the `operator&&`: it makes possible to handle two specifications; the `operator&&` makes possible to compact the code (see in file).
