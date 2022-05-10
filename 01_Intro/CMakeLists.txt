@@ -23,3 +23,6 @@ set (LDFLAGS "-std=c++14")
 add_executable(srp SRP.cpp ${SRC_FILES})
 target_link_libraries(srp ${Boost_LIBRARIES})
 
+# ./ocp
+add_executable(ocp OCP.cpp ${SRC_FILES})
+target_link_libraries(ocp ${Boost_LIBRARIES})
