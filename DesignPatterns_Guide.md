@@ -124,3 +124,5 @@ Links:
 - [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 - [Static Members of a C++ Class](https://www.tutorialspoint.com/cplusplus/cpp_static_members.htm)
 - [Static functions outside classes](https://stackoverflow.com/questions/25724787/static-functions-outside-classes)
+
+### 1. Open-Closed Principle: `01_Intro/SRP.cpp`
