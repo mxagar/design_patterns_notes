@@ -26,3 +26,7 @@ target_link_libraries(srp ${Boost_LIBRARIES})
 # ./ocp
 add_executable(ocp OCP.cpp ${SRC_FILES})
 target_link_libraries(ocp ${Boost_LIBRARIES})
+
+# ./lsp
+add_executable(lsp LSP.cpp ${SRC_FILES})
+target_link_libraries(lsp ${Boost_LIBRARIES})
