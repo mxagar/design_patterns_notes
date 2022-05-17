@@ -125,7 +125,7 @@ Links:
 - [Static Members of a C++ Class](https://www.tutorialspoint.com/cplusplus/cpp_static_members.htm)
 - [Static functions outside classes](https://stackoverflow.com/questions/25724787/static-functions-outside-classes)
 
-### 1. Open-Closed Principle: `01_Intro/OCP.cpp`
+### 2. Open-Closed Principle: `01_Intro/OCP.cpp`
 
 The Open-Closed Principle states that the system should be 
 
@@ -204,3 +204,8 @@ struct ColorSpecification : Specification<Product>
 Other code pieces/elements:
 - `override`: it means it is overriding a virtual function from a base class; it appears after the function definition.
 - The class `AndSpecification` is also defined with the `operator&&`: it makes possible to handle two specifications; the `operator&&` makes possible to compact the code (see in file).
+
+### 3. Liskov Substitution Principle: `01_Intro/OCP.cpp`
+
+Named after [Barbara Liskov](https://en.wikipedia.org/wiki/Barbara_Liskov), this principle states that **subtypes should be immediately substitutable by their base types**.
+
