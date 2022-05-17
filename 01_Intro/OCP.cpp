@@ -7,7 +7,6 @@
  * Open for extension, closed for modification
  * 
  */
-// 
 
 #include <string>
 #include <vector>
