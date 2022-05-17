@@ -205,7 +205,87 @@ Other code pieces/elements:
 - `override`: it means it is overriding a virtual function from a base class; it appears after the function definition.
 - The class `AndSpecification` is also defined with the `operator&&`: it makes possible to handle two specifications; the `operator&&` makes possible to compact the code (see in file).
 
-### 3. Liskov Substitution Principle: `01_Intro/OCP.cpp`
+### 3. Liskov Substitution Principle: `01_Intro/LSP.cpp`
 
 Named after [Barbara Liskov](https://en.wikipedia.org/wiki/Barbara_Liskov), this principle states that **subtypes should be immediately substitutable by their base types**.
+
+The example given uses the classes `Rectangle` and `Square`. Although it may seem sensible to inherit `Square` from `Rectangle`, the `set_width/height()` functions enter in conflict: a square changes both dimensions when one is set. Thus, we get inexpected behavior. The solution is not using inheritance and working with squares as if they were rectangles. A factory is used to create differentiated objects, but they are rectangles at the end.
+
+```c++
+class Rectangle
+{
+// Protexted: accessible from within the class, inherited class & children
+protected:
+  int width, height;
+public:
+  Rectangle(const int width, const int height)
+    : width{width}, height{height} { }
+
+  // set_* is virtual so that they are overridden in child class Square
+  int get_width() const { return width; }
+  virtual void set_width(const int width) { this->width = width; }
+  int get_height() const { return height; }
+  virtual void set_height(const int height) { this->height = height; }
+
+  int area() const { return width * height; }
+};
+
+// Square is inherited from Rectangle
+// It sounds plausible, but doing so, when we redefine the set_*
+// methods, the Liskov substitution principle is broken!
+// We cannot substitute a square by a rectangle
+class Square : public Rectangle
+{
+public:
+  Square(int size): Rectangle(size,size) {}
+  // We override virtual set_* functions
+  void set_width(const int width) override {
+    // Setting both the height and the width with size
+    // is correct for the Square, but wrong for the Rectangle.
+    // We are breaking the Liskov substitution principle!
+    this->width = height = width;
+  }
+  void set_height(const int height) override {
+    this->height = width = height;
+  }
+};
+
+// Possible solutions to avoid breaking Liskov:
+// - Square maybe should not be inherited from Rectangle
+// - Instead, we could use Rectangle, and (1) add a flag inside to denote when it's a square
+// - or, (2) we can use a factory with Rectangles.
+// The factory creates rectangles or squares, but it always returns Rectangles.
+struct RectangleFactory
+{
+  // Static functions: they can be called without instantiating RectangleFactory
+  // Functions to be implemented.
+  static Rectangle create_rectangle(int w, int h);
+  static Rectangle create_square(int size);
+};
+
+// This function processes Rectangles passed by reference
+// so we can pass also Squares.
+// BUT: Since the Liskov substitution principe is broken,
+// it won't work as expected.
+void process(Rectangle& r)
+{
+  int w = r.get_width();
+  r.set_height(10);
+
+  std::cout << "expected area = " << (w * 10) 
+    << ", got " << r.area() << std::endl;
+}
+
+int main()
+{
+  Rectangle r{ 5,5 };
+  process(r);
+
+  Square s{ 5 };
+  process(s);
+
+  //getchar();
+  return 0;
+}
+```
 
