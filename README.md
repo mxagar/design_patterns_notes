@@ -67,7 +67,7 @@ I use both Python and C++ in the notes and code examples.
 
 ### C++
 
-The [boost](https://www.boost.org/) libraries is used throughout the course. To install it on a mac:
+The [boost](https://www.boost.org/) libraries are used throughout the course. To install it on a Mac:
 
 ```bash
 brew install boost
@@ -90,8 +90,12 @@ target_link_libraries(main ${Boost_LIBRARIES})
 
 ## Overview of Contents
 
-- [DesignPatterns_SOLID.md](DesignPatterns_SOLID.md)
-  1. Introduction: SOLID Design Principles
+- [DesignPatterns_01_SOLID.md](DesignPatterns_01_SOLID.md)
+  1. Single Responsibility Principle: `01_SOLID/SRP.cpp`
+  2. Open-Closed Principle: `01_SOLID/OCP.cpp`
+  3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`
+  4. Interface Segregation Principle: `01_SOLID/ISP.cpp`
+  5. Dependency Inversion Principle: `01_SOLID/DIP.cpp`
 - ...
 
 
