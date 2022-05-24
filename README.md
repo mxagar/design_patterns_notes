@@ -22,17 +22,22 @@ In addition to the aforementioned courses, I also used the following resources:
 
 The notes are divided into the following documents:
 
-- [DesignPatterns_SOLID.md](DesignPatterns_SOLID.md)
-- ...
+- [DesignPatterns_01_SOLID.md](DesignPatterns_01_SOLID.md)
+- TBD ...
 
 ## What Are Design Patterns?
 
 Design Patterns are common and re-usable programming approaches that were popularized in the book of the same name (by "the gang of four": Gamma, Helm, Johnson & Vlissides).
 They have been internalized to some languages and every programmer should know them, since they are the basic vocabulary and grammar for software architecture.
 
-Structure of contents:
+Compilation of patterns and principles:
 
 - SOLID Design Principles
+  - Single Responsibility
+  - Open-Closed
+  - Liskov Substitution
+  - Interface Segregation
+  - Dependency Inversion
 - Creational Patterns
   - Builder
   - Factories: Absract, Factory Method
@@ -86,7 +91,9 @@ target_link_libraries(main ${Boost_LIBRARIES})
 
 ### Python
 
+No preliminary installations needed; concrete installations introduced in specific example explanations, if needed.
 
+I use `conda` environments.
 
 ## Overview of Contents
 
