@@ -30,3 +30,11 @@ target_link_libraries(ocp ${Boost_LIBRARIES})
 # ./lsp
 add_executable(lsp LSP.cpp ${SRC_FILES})
 target_link_libraries(lsp ${Boost_LIBRARIES})
+
+# ./isp
+add_executable(isp ISP.cpp ${SRC_FILES})
+target_link_libraries(isp ${Boost_LIBRARIES})
+
+# ./dip
+add_executable(dip DIP.cpp ${SRC_FILES})
+target_link_libraries(dip ${Boost_LIBRARIES})
