@@ -48,7 +48,7 @@ Structucture of contents:
   - Proxy
 - Behavioral Patterns
   - Chain of Responsibility
-  - Commandd
+  - Command
   - Interpreter
   - Iterator
   - Mediator
@@ -289,3 +289,87 @@ int main()
 }
 ```
 
+### 4. Interface Segregation Principle: `01_Intro/ISP.cpp`
+
+The idea is to avoid interfaces which are too large.
+
+An example is given with a multi-function printer that is able to print and scan.  
+Instead of implementing a complex interface which provides with the `print()` and `scan()` functions, we break it down to two interfaces that are later used in a thirds interface.
+
+```c++
+
+// --- BAD PATTERN
+
+struct IMachine
+{
+  virtual void print(Document& doc) = 0;
+  virtual void fax(Document& doc) = 0;
+  virtual void scan(Document& doc) = 0;
+};
+
+struct MFP : IMachine
+{
+  void print(Document& doc) override;
+  void fax(Document& doc) override;
+  void scan(Document& doc) override;
+};
+
+// --- GOOD PATTERN
+
+// Abstract, Interface
+struct IPrinter
+{
+  virtual void print(Document& doc) = 0;
+};
+
+// Abstract, Interface
+struct IScanner
+{
+  virtual void scan(Document& doc) = 0;
+};
+
+// Concrete class
+struct Printer : IPrinter
+{
+  void print(Document& doc) override;
+};
+
+// Concrete class
+struct Scanner : IScanner
+{
+  void scan(Document& doc) override;
+};
+
+// Abstract, Interface
+struct IMachine: IPrinter, IScanner
+{
+};
+
+// Concrete class
+struct Machine : IMachine
+{
+  IPrinter& printer;
+  IScanner& scanner;
+
+  Machine(IPrinter& printer, IScanner& scanner)
+    : printer{printer},
+      scanner{scanner}
+  {
+  }
+
+  void print(Document& doc) override {
+    printer.print(doc);
+  }
+  void scan(Document& doc) override;
+};
+
+```
+
+### 5. Dependency Inversion Principle: `01_Intro/DIP.cpp`
+
+The Dependency Inversion Principle is based on the following two concepts:
+
+1. High-level modules should not depend on low-level modules. Both should depend on abstractions.
+2. Abstractions should not depend on details. Details should depend on abstractions.
+
+It is a way of protecting from implementation changes in low-level modules.
