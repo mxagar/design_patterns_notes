@@ -1,4 +1,4 @@
-# Design Patterns: Introduction
+# Design Patterns: SOLID
 
-This folder contains material related to general information on design patterns.
-For the complete guide on design patterns, look at ``../DesignPatterns_Guide.md`.
+This folder contains material related to the SOLID Design Principles.
+For the complete guide on them, look at `../DesignPatterns_SOLID.md`.
