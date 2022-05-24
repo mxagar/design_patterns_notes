@@ -30,13 +30,16 @@ struct Person
   string name;
 };
 
+// Abstraction, Interface
 struct RelationshipBrowser
 {
   virtual vector<Person> find_all_children_of(const string& name) = 0;
 };
 
+// Concrete class, inherited from abstraction / interface
 struct Relationships : RelationshipBrowser // low-level
 {
+  // tuple: collection of different types
   vector<tuple<Person, Relationship, Person>> relations;
 
   void add_parent_and_child(const Person& parent, const Person& child)
@@ -68,6 +71,12 @@ struct Research // high-level
       cout << "John has a child called " << child.name << endl;
     }
   }
+
+// -- BAD PATTERN
+//  This would break the ISP principle,
+//  because high-level would depend on low-level
+//  The problem is that if we change the implementation of the low-level Relationship
+//  this code does not work anymore!
 //  Research(const Relationships& relationships)
 //  {
 //    auto& relations = relationships.relations;

@@ -10,6 +10,7 @@
 #include <vector>
 struct Document; // We want print & scan this document
 
+// -- BAD PATTERN
 //struct IMachine
 //{
 //  virtual void print(Document& doc) = 0;
@@ -28,6 +29,7 @@ struct Document; // We want print & scan this document
 // 2. Client does not need this
 // 3. Forcing implementors to implement too much
 
+// -- GOOD PATTERN
 struct IPrinter
 {
   virtual void print(Document& doc) = 0;
