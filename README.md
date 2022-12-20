@@ -22,8 +22,17 @@ In addition to the aforementioned courses, I also used the following resources:
 
 The notes are divided into the following documents:
 
-- [DesignPatterns_01_SOLID.md](DesignPatterns_01_SOLID.md)
-- TBD ...
+- [`DesignPatterns_01_SOLID.md`](DesignPatterns_01_SOLID.md)
+- [`DesignPatterns_02_Creational.md`](DesignPatterns_02_Creational.md)
+- [`DesignPatterns_03_Structural.md`](DesignPatterns_03_Structural.md)
+- [`DesignPatterns_04_Behavioral.md`](DesignPatterns_04_Behavioral.md)
+
+And the code with examples is located in their corresponding folders:
+
+- [`01_SOLID/`](01_SOLID)
+- [`02_Creational_Patterns/`](02_Creational_Patterns)
+- [`03_Structural_Patterns/`](03_Structural_Patterns)
+- [`04_Behavioral_Patterns`](04_Behavioral_Patterns)
 
 ## What Are Design Patterns?
 
@@ -94,17 +103,6 @@ target_link_libraries(main ${Boost_LIBRARIES})
 No preliminary installations needed; concrete installations introduced in specific example explanations, if needed.
 
 I use `conda` environments.
-
-## Overview of Contents
-
-- [DesignPatterns_01_SOLID.md](DesignPatterns_01_SOLID.md)
-  1. Single Responsibility Principle: `01_SOLID/SRP.cpp`
-  2. Open-Closed Principle: `01_SOLID/OCP.cpp`
-  3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`
-  4. Interface Segregation Principle: `01_SOLID/ISP.cpp`
-  5. Dependency Inversion Principle: `01_SOLID/DIP.cpp`
-- ...
-
 
 ## Authorship
 

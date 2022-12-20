@@ -1,16 +1,25 @@
 # Design Patterns: SOLID Design Principles
 
-This guide contains the definition and examples of the SOLID Design Principles.
+This document/guide is the first from a set of 4 documents:
 
-SOLID Design Principles were introduced by Robert C. Martin (Uncle Bob), known also for the Agile Manifesto.
+1. **SOLID Design Principles**
+2. Creational Patterns
+3. Structural Patterns
+4. Behavioral Patterns
 
-Overview of sections:
+See the overview file [`README.md`](README.md) for more information on the origin of the guides.
 
-1. Single Responsibility Principle: `01_SOLID/SRP.cpp`
-2. Open-Closed Principle: `01_SOLID/OCP.cpp`
-3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`
-4. Interface Segregation Principle: `01_SOLID/ISP.cpp`
-5. Dependency Inversion Principle: `01_SOLID/DIP.cpp`
+In the present guide, the **SOLID Design Principles** are defined and examples are given. The SOLID Design Principles were introduced by Robert C. Martin (Uncle Bob), known also for the Agile Manifesto.
+
+Table of Contents:
+
+- [Design Patterns: SOLID Design Principles](#design-patterns-solid-design-principles)
+  - [1. Single Responsibility Principle: `01_SOLID/SRP.cpp`](#1-single-responsibility-principle-01_solidsrpcpp)
+    - [Python](#python)
+  - [2. Open-Closed Principle: `01_SOLID/OCP.cpp`](#2-open-closed-principle-01_solidocpcpp)
+  - [3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`](#3-liskov-substitution-principle-01_solidlspcpp)
+  - [4. Interface Segregation Principle: `01_SOLID/ISP.cpp`](#4-interface-segregation-principle-01_solidispcpp)
+  - [5. Dependency Inversion Principle: `01_SOLID/DIP.cpp`](#5-dependency-inversion-principle-01_soliddipcpp)
 
 ## 1. Single Responsibility Principle: `01_SOLID/SRP.cpp`
 
@@ -52,6 +61,12 @@ Links:
 - [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 - [Static Members of a C++ Class](https://www.tutorialspoint.com/cplusplus/cpp_static_members.htm)
 - [Static functions outside classes](https://stackoverflow.com/questions/25724787/static-functions-outside-classes)
+
+### Python
+
+See the notebook [SOLID_Principles.ipynb](./01_SOLID/).
+
+
 
 ## 2. Open-Closed Principle: `01_SOLID/OCP.cpp`
 
