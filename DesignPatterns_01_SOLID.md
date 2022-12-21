@@ -14,16 +14,16 @@ In the present guide, the **SOLID Design Principles** are defined and examples a
 Table of Contents:
 
 - [Design Patterns: SOLID Design Principles](#design-patterns-solid-design-principles)
-  - [1. Single Responsibility Principle: `01_SOLID/SRP.cpp`](#1-single-responsibility-principle-01_solidsrpcpp)
+  - [1. Single Responsibility Principle (SRP): `01_SOLID/SRP.cpp`](#1-single-responsibility-principle-srp-01_solidsrpcpp)
     - [Python](#python)
   - [2. Open-Closed Principle: `01_SOLID/OCP.cpp`](#2-open-closed-principle-01_solidocpcpp)
   - [3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`](#3-liskov-substitution-principle-01_solidlspcpp)
   - [4. Interface Segregation Principle: `01_SOLID/ISP.cpp`](#4-interface-segregation-principle-01_solidispcpp)
   - [5. Dependency Inversion Principle: `01_SOLID/DIP.cpp`](#5-dependency-inversion-principle-01_soliddipcpp)
 
-## 1. Single Responsibility Principle: `01_SOLID/SRP.cpp`
+## 1. Single Responsibility Principle (SRP): `01_SOLID/SRP.cpp`
 
-A class should take one responsibility, and only one. That way, we are going to have only one reason to change it. That is related to the **separation of concerns**: we assign clear concerns to specific classes.
+A class should take one responsibility, and only one. That way, we are going to have only one reason to change it. The principle is also known as **Separation of Concerns (SOC)**: we assign clear concerns to specific classes.
 
 The example used in the tutorial is a `Journal` class: we can create journals to which we `add()` entries; at some point we want to save them. It might seem natural to write `save()` method. However, we might have many similar classes that need to be saved similarly: `Notebook`, `Workbook`, etc. Thus, we centralize the saving functionality to a specific class that is concerned with the saving of many different classes; that class is called the `PersistenceManager`. Similarly, we could have a `LoadingManager` class which takes care of loading.
 
@@ -66,7 +66,71 @@ Links:
 
 See the notebook [SOLID_Principles.ipynb](./01_SOLID/).
 
+```python
+class Journal:
+    def __init__(self):
+        self.entries = []
+        self.count = 0
 
+    def add_entry(self, text):
+        self.entries.append(f"{self.count}: {text}")
+        self.count += 1
+
+    def remove_entry(self, pos):
+        del self.entries[pos]
+
+    def __str__(self):
+        return "\n".join(self.entries)
+
+    # Break SRP = Single Responsibility Principle
+    # Saving is a responsibility that should be handled
+    # by a class that persists the complete family
+    # of journal classes!
+    # Giving too many responsibilities to single classes
+    # creates the anti-pattern of a God Object:
+    # a gigant class which does everything,
+    # which is very difficult to maintain!
+    def save(self, filename):
+        file = open(filename, "w")
+        file.write(str(self))
+        file.close()
+
+    def load(self, filename):
+        pass
+
+    def load_from_web(self, uri):
+        pass
+
+# Persisting of objects should be handled by a spacific class
+# which takes care of all faminily of journal classes.
+# That way, the saving processes are all localized
+# in the same spot -> easier to maintain!
+class PersistenceManager:
+    # Static method: it cannot access/modify either the instance or the class
+    # but it can be used from both.
+    # They signal that the function is independent from the class/object,
+    # i.e., some kind of utility procedure; that improves mantainability.
+    @staticmethod
+    def save_to_file(journal, filename):
+        file = open(filename, "w")
+        file.write(str(journal))
+        file.close()
+
+
+j = Journal()
+j.add_entry("I cried today.")
+j.add_entry("I ate a bug.")
+print(f"Journal entries:\n{j}\n")
+
+p = PersistenceManager()
+file = r'./journal.txt'
+p.save_to_file(j, file)
+
+# verify!
+with open(file) as fh:
+    print(fh.read())
+
+```
 
 ## 2. Open-Closed Principle: `01_SOLID/OCP.cpp`
 
