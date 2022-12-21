@@ -47,16 +47,17 @@ class PersistenceManager:
         file.write(str(journal))
         file.close()
 
+if __name__ == "__main__":
 
-j = Journal()
-j.add_entry("I cried today.")
-j.add_entry("I ate a bug.")
-print(f"Journal entries:\n{j}\n")
+    j = Journal()
+    j.add_entry("I cried today.")
+    j.add_entry("I ate a bug.")
+    print(f"Journal entries:\n{j}\n")
 
-p = PersistenceManager()
-file = r'./journal.txt'
-p.save_to_file(j, file)
+    p = PersistenceManager()
+    file = r'./journal.txt'
+    p.save_to_file(j, file)
 
-# verify!
-with open(file) as fh:
-    print(fh.read())
+    # verify!
+    with open(file) as fh:
+        print(fh.read())
