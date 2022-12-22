@@ -19,7 +19,9 @@ Table of Contents:
   - [2. Open-Closed Principle: `01_SOLID/OCP.cpp`](#2-open-closed-principle-01_solidocpcpp)
     - [Python Implementation](#python-implementation-1)
   - [3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`](#3-liskov-substitution-principle-01_solidlspcpp)
+    - [Python Implementation](#python-implementation-2)
   - [4. Interface Segregation Principle: `01_SOLID/ISP.cpp`](#4-interface-segregation-principle-01_solidispcpp)
+    - [Python Implementation](#python-implementation-3)
   - [5. Dependency Inversion Principle: `01_SOLID/DIP.cpp`](#5-dependency-inversion-principle-01_soliddipcpp)
 
 ## 1. Single Responsibility Principle (SRP): `01_SOLID/SRP.cpp`
@@ -394,7 +396,7 @@ for p in bf.filter(products, large_blue):
 
 Named after [Barbara Liskov](https://en.wikipedia.org/wiki/Barbara_Liskov), this principle states that **subtypes should be immediately substitutable by their base types**.
 
-The example given uses the classes `Rectangle` and `Square`. Although it may seem sensible to inherit `Square` from `Rectangle`, the `set_width/height()` functions enter in conflict: a square changes both dimensions when one is set. Thus, we get inexpected behavior. The solution is not using inheritance and working with squares as if they were rectangles. A factory is used to create differentiated objects, but they are rectangles at the end.
+The example given uses the classes `Rectangle` and `Square`. Although it may seem sensible to inherit `Square` from `Rectangle`, the `set_width/height()` functions enter in conflict: a square changes both dimensions when one is set. Thus, we get unexpected behavior. The solution is not using inheritance and working with squares as if they were rectangles. A factory is used to create differentiated objects, but they are rectangles at the end.
 
 ```c++
 class Rectangle
@@ -474,12 +476,95 @@ int main()
 }
 ```
 
+### Python Implementation
+
+```python
+class Rectangle:
+    def __init__(self, width, height):
+        # We add _ to signal that these are private
+        # Then, we define getters and setters
+        self._height = height
+        self._width = width
+
+    @property
+    def area(self):
+        return self._width * self._height
+
+    def __str__(self):
+        # Note that self.width is calling self.width()
+        # via the @property decorator
+        return f'Width: {self.width}, height: {self.height}'
+
+    # Property decorator: getter for width
+    # Note: same name without _
+    # Thus, we can now do object.width
+    # and that calls object.width()
+    # Using this strategy makes possible to handle
+    # unit conversions, etc.
+    @property
+    def width(self):
+        return self._width
+
+    # Setter of the property.
+    # Thus we can do now object.width = value
+    # and that calls object.width(value)
+    @width.setter
+    def width(self, value):
+        self._width = value
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        self._height = value
+
+# Now, we inherit Square from Rectangle
+class Square(Rectangle):
+    def __init__(self, size):
+        Rectangle.__init__(self, size, size)
+
+    # We call the setter of the Rectangle parent class
+    @Rectangle.width.setter
+    def width(self, value):
+        self._width = self._height = value
+
+    @Rectangle.height.setter
+    def height(self, value):
+        self._width = self._height = value
+
+### __main__
+
+# This function breaks the Liskov substitution principle.
+# According to the principle, if we use an inheritec class of Rectangle,
+# i.e., Square, the function should work.
+# However, it doesn't work, because Square re-assings the width when the height
+# is modified.
+# Possible solutions:
+# - Do not create a Square class inherited from Rectangle: use Rectangle instead, maybe with a bool isSquare.
+# - We can use factories also, introduced later.
+def use_it(rc):
+    w = rc.width
+    rc.height = 10  # unpleasant side effect
+    expected = int(w * 10)
+    print(f'Expected an area of {expected}, got {rc.area}')
+
+# 
+rc = Rectangle(2, 3)
+use_it(rc)
+
+sq = Square(5)
+use_it(sq)
+
+```
+
 ## 4. Interface Segregation Principle: `01_SOLID/ISP.cpp`
 
 The idea is to avoid interfaces which are too large.
 
 An example is given with a multi-function printer that is able to print and scan.  
-Instead of implementing a complex interface which provides with the `print()` and `scan()` functions, we break it down to two interfaces that are later used in a thirds interface.
+Instead of implementing a complex interface which provides with the `print()` and `scan()` functions, we break it down to two interfaces that are later used in a third interface.
 
 ```c++
 
@@ -547,6 +632,125 @@ struct Machine : IMachine
   }
   void scan(Document& doc) override;
 };
+
+```
+
+### Python Implementation
+
+```python
+from abc import abstractmethod
+
+class Machine:
+    def print(self, document):
+        raise NotImplementedError
+
+    def fax(self, document):
+        raise NotImplementedError
+
+    def scan(self, document):
+        raise NotImplementedError
+
+# A multi-function device works with all the
+# interfaces from Machine, so it's OK
+class MultiFunctionPrinter(Machine):
+    def print(self, document):
+        pass # we would write our implementation
+
+    def fax(self, document):
+        pass # we would write our implementation
+
+    def scan(self, document):
+        pass # we would write our implementation
+
+# An old-fashioned printer is not expected to have all the
+# functionalities in Machine!
+class OldFashionedPrinter(Machine):
+    def print(self, document):
+        # OK for an old-fashioned printer, it can print
+        pass # we would write our implementation
+
+    def fax(self, document):
+        # No operation: an old-fashioned printer cannot fax!
+        pass  # do-nothing: problematic, because the interface is there!
+
+    # An old-fashioned printer cannot scan
+    def scan(self, document):
+        """Not supported!"""
+        # Another option to doing nothing is raising an error
+        # but it crashes the code.
+        raise NotImplementedError('Printer cannot scan!')
+
+## Solution: we create classes for each functionality and then combine them!
+
+# Abstract class: not to be instantiate, only inherited
+class Printer:
+    # Abstract method: not implemented
+    @abstractmethod
+    def print(self, document): pass
+
+class Scanner:
+    @abstractmethod
+    def scan(self, document): pass
+
+class FaxMachine:
+    @abstractmethod
+    def fax(self, document): pass
+
+# Concrete classes inheriting base abstract classes
+class MyPrinter(Printer):
+    def print(self, document):
+        print(document)
+
+class Photocopier(Printer, Scanner):
+    def print(self, document):
+        print(document)
+
+    def scan(self, document):
+        pass  # something meaningful
+
+# Abstract class which combines several abstract classes
+class MultiFunctionDevice(Printer, Scanner, FaxMachine):
+    @abstractmethod
+    def print(self, document):
+        pass
+
+    @abstractmethod
+    def scan(self, document):
+        pass
+
+    @abstractmethod
+    def fax(self, document):
+        pass
+    
+class MultiFunctionMachine(MultiFunctionDevice):
+    #def __init__(self, printer, scanner, faxmachine):
+    #    self.printer = printer
+    #    self.scanner = scanner
+    #    self.faxmachine = faxmachine
+
+    def print(self, document):
+        #self.printer.print(document)
+        print("printing", document)
+        
+    def scan(self, document):
+        #self.scanner.scan(document)
+        print("scanning", document)
+        
+    def fax(self, document):
+        #self.faxmachine.fax(document)
+        print("faxing", document)
+        
+### __main__
+
+my_machine = MultiFunctionMachine()
+my_machine.print('test')
+my_machine.fax('test')
+my_machine.scan('test')
+
+# This will raise an error
+printer = OldFashionedPrinter()
+printer.fax(123)  # nothing happens
+printer.scan(123)  # oops!
 
 ```
 
