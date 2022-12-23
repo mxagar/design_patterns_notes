@@ -761,4 +761,85 @@ The Dependency Inversion Principle is based on the following two concepts:
 1. High-level modules should not depend on low-level modules. Both should depend on abstractions.
 2. Abstractions should not depend on details. Details should depend on abstractions.
 
-It is a way of protecting from implementation changes in low-level modules.
+It is a way of protecting from implementation changes in low-level modules. Note that:
+
+- low-level modules/classes are the ones which deal with storage, or similar,
+- high-level modules/classes are the ones which deal with browsing stored objects, or similar.
+
+Don't confuse it with the *dependency injection*, it doesn't directly relate to it.
+
+Example in python: a constellation of classes which deals with:
+
+- Persons
+- Relationships between them (parent, child, etc.)
+- And a browsing class which researches from stored relationships
+
+```python
+from abc import abstractmethod
+from enum import Enum
+
+
+class Relationship(Enum):
+    PARENT = 0
+    CHILD = 1
+    SIBLING = 2
+
+
+class Person:
+    def __init__(self, name):
+        self.name = name
+
+
+class RelationshipBrowser:
+    @abstractmethod
+    def find_all_children_of(self, name): pass
+
+
+class Relationships(RelationshipBrowser):  # low-level
+    def __init__(self):
+        self.relations = []
+
+    def add_parent_and_child(self, parent, child):
+        self.relations.append((parent, Relationship.PARENT, child))
+        self.relations.append((child, Relationship.CHILD, parent))
+            
+    def find_all_children_of(self, name):
+        for r in self.relations:
+            if r[0].name == name and r[1] == Relationship.PARENT:
+                yield r[2].name
+
+# We could have used the relations list from Relationships
+# but that's risky: if we change the storage implementation of the relations
+# this high-level class breaks. Thus, instead, we create and use interfaces:
+# - a RelationshipBrowser interface is created, used to inherit Relationships
+# - the browser has abstract methods which find relations in which occur names
+# - the high level class uses the browser to find relations, so no low-level strucures are used directly!
+# Therefore, changing low-level classes doesn't affect high-level ones!
+class Research: # high-level
+    # dependency on a low-level module directly
+    # bad because strongly dependent on e.g. storage type
+
+    # def __init__(self, relationships):
+    #     # high-level: find all of john's children
+    #     relations = relationships.relations
+    #     for r in relations:
+    #         if r[0].name == 'John' and r[1] == Relationship.PARENT:
+    #             print(f'John has a child called {r[2].name}.')
+
+    def __init__(self, browser):
+        for p in browser.find_all_children_of("John"):
+            print(f'John has a child called {p}')
+
+### __main__
+            
+parent = Person('John')
+child1 = Person('Chris')
+child2 = Person('Matt')
+
+# low-level module
+relationships = Relationships()
+relationships.add_parent_and_child(parent, child1)
+relationships.add_parent_and_child(parent, child2)
+
+Research(relationships)
+```
