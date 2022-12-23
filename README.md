@@ -39,39 +39,45 @@ And the code with examples is located in their corresponding folders:
 Design Patterns are common and re-usable programming approaches that were popularized in the book of the same name (by "the gang of four": Gamma, Helm, Johnson & Vlissides).
 They have been internalized to some languages and every programmer should know them, since they are the basic vocabulary and grammar for software architecture.
 
-Compilation of patterns and principles:
+According to the Gamma categorization (Erich Gamma, from the Gang of Four), there are three types of patterns:
 
-- SOLID Design Principles
-  - Single Responsibility
-  - Open-Closed
-  - Liskov Substitution
-  - Interface Segregation
-  - Dependency Inversion
-- Creational Patterns
-  - Builder
-  - Factories: Absract, Factory Method
-  - Prototype
-  - Singleton
-- Structural Patterns
-  - Adapter
-  - Bridge
-  - Composite
-  - Decorator
-  - Facade
-  - Flyweight
-  - Proxy
-- Behavioral Patterns
-  - Chain of Responsibility
-  - Command
-  - Interpreter
-  - Iterator
-  - Mediator
-  - Memento
-  - Observer
-  - State
-  - Strategy
-  - Template Method
-  - Visitor
+1. Creational
+2. Structural
+3. Behavioral
+
+This guide compiles all the patterns defined in the book by the Gang of Four and additionally introduces the SOLID principles:
+
+1. SOLID Design Principles
+   - Single Responsibility
+   - Open-Closed
+   - Liskov Substitution
+   - Interface Segregation
+   - Dependency Inversion
+2. Creational Patterns
+   - Builder
+   - Factories: Abstract, Factory Method
+   - Prototype
+   - Singleton
+3. Structural Patterns
+   - Adapter
+   - Bridge
+   - Composite
+   - Decorator
+   - Facade
+   - Flyweight
+   - Proxy
+4. Behavioral Patterns
+   - Chain of Responsibility
+   - Command
+   - Interpreter
+   - Iterator
+   - Mediator
+   - Memento
+   - Observer
+   - State
+   - Strategy
+   - Template Method
+   - Visitor
 
 Nesteruk warns that, for the sake of simplicity, there are some simplifications in his examples: liberal use of public members, lack of virtual destructors, passing/returning by value, lack of move operations...
 
