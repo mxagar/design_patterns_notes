@@ -110,6 +110,11 @@ No preliminary installations needed; concrete installations introduced in specif
 
 I use `conda` environments.
 
+## Interesting Links and Resources
+
+- [All 23 OOP software design patterns with examples in Python](https://medium.com/@cautaerts/all-23-oop-software-design-patterns-with-examples-in-python-cac1d3f4f4d5)
+- [SOLID Principles In Python](https://medium.com/@umaparvat/solid-principles-in-python-c9c3c337e0e1)
+
 ## Authorship
 
 Original code and examples: Dmitri Nesteruk.
