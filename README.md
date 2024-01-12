@@ -110,6 +110,10 @@ No preliminary installations needed; concrete installations introduced in specif
 
 I use `conda` environments.
 
+## Interesting Links
+
+- [Architecture Patterns: The Cheat Sheet](https://medium.com/scub-lab/architecture-patterns-the-cheat-sheet-e8b5386f4b4b)
+
 ## Authorship
 
 Original code and examples: Dmitri Nesteruk.
