@@ -9,7 +9,7 @@ This document/guide is the first from a set of 4 documents:
 
 See the overview file [`README.md`](README.md) for more information on the origin of the guides.
 
-In the present guide, the **SOLID Design Principles** are defined and examples are given. The SOLID Design Principles were introduced by Robert C. Martin (Uncle Bob), known also for the Agile Manifesto.
+In the present guide, the **SOLID Design Principles** are defined and examples are given. The SOLID Design Principles were introduced by [Robert C. Martin (Uncle Bob)](https://en.wikipedia.org/wiki/Robert_C._Martin), known also for the Agile Manifesto.
 
 Table of Contents:
 
@@ -105,7 +105,7 @@ class Journal:
         pass
 
 # Persisting of objects should be handled by a spacific class
-# which takes care of all faminily of journal classes.
+# which takes care of all family of journal classes.
 # That way, the saving processes are all localized
 # in the same spot -> easier to maintain!
 class PersistenceManager:
@@ -145,7 +145,7 @@ The Open-Closed Principle states that the system should be
 
 That is achieved by creating template classes for everything we create and inheriting them on any new use case.
 
-The example used is a product filter: products have two properties `color` and `size` ddefine as `enums`,  and we want to filter them depending on those values. The first version of the filter is a series of functions like `filter_by_color()` nested in a `struct`; however, the `struct` needs to be changed/extended inside every time we define a new filter.
+The example used is a product filter: products have two properties `color` and `size` define as `enums`, and we want to filter them depending on those values. The first version of the filter is a series of functions like `filter_by_color()` nested in a `struct`; however, the `struct` needs to be changed/extended inside every time we define a new filter.
 
 With the OCP, we transform that to have two pure virtual classes: `Specification` and `Filter`. We inherit `Specification` for each particular property. All inherited `Specifications` will have the same checking function `is_satistifed()`. Then, a `BetterFilter` class is inherited which calls that function `is_satistifed()` of generic `Specifications`, which when used, can be any particular ones.
 
