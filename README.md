@@ -324,6 +324,7 @@ def _(value):
 - [Architecture Patterns: The Cheat Sheet](https://medium.com/scub-lab/architecture-patterns-the-cheat-sheet-e8b5386f4b4b)
 - [It All Comes Down To Design Patterns](https://towardsdatascience.com/it-all-comes-down-to-design-patterns-c7034eb39ef9)
 - [Refactoring Guru: Design Patterns](https://refactoring.guru/design-patterns)
+- [Design Patterns Quick Reference by Jason McDonald](http://www.mcdonaldland.info/2007/11/28/40/)
 
 ## Authorship
 
