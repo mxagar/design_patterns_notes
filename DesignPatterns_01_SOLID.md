@@ -284,7 +284,7 @@ class ProductFilter:
 # To tolve the issue of breaking OCP,
 # we use a Specification + Filter classes.
 # We're going to inherit override these classes,
-# 
+# so we can leaver them unimplemented.
 class Specification:
     def is_satisfied(self, item):
         pass
@@ -292,6 +292,8 @@ class Specification:
     # We overload the & operator, which makes life easier
     # In Python, we cannot overload the and operator,
     # but we can overload the & operator with __and__
+    # Note that we return an AndSpecification!
+    # Similarly, we can implement an OrSpecification!
     def __and__(self, other):
         return AndSpecification(self, other)
 
@@ -326,6 +328,11 @@ class SizeSpecification(Specification):
 
 # This is a COMBINATOR
 # We give a variable number of arguments, i.e., specifications: *args
+# With it, we can combine specifications with an and-relationship
+# between them.
+# To use it, we add the __and__ operator implementation to Specification,
+# which returns an AndSpecification!
+# We could do the same with __or__ and OrSpecification!
 class AndSpecification(Specification):
     def __init__(self, *args):
         self.args = args
@@ -394,7 +401,7 @@ for p in bf.filter(products, large_blue):
 
 ## 3. Liskov Substitution Principle: `01_SOLID/LSP.cpp`
 
-Named after [Barbara Liskov](https://en.wikipedia.org/wiki/Barbara_Liskov), this principle states that **subtypes should be immediately substitutable by their base types**.
+Named after [Barbara Liskov](https://en.wikipedia.org/wiki/Barbara_Liskov), this principle states that **objects of a superclass should be replaceable by objects of its subclasses without affecting the correctness of the program**. This is a unidirectional requirement, focusing on ensuring that subclasses behave as expected when they are used in place of their superclass: any function or method that uses the superclass can also operate with any of its subclasses, but not the other way around, i.e., we can for instance have methods or properties exclusive to the subclass and which don't appear in the superclass.
 
 The example given uses the classes `Rectangle` and `Square`. Although it may seem sensible to inherit `Square` from `Rectangle`, the `set_width/height()` functions enter in conflict: a square changes both dimensions when one is set. Thus, we get unexpected behavior. The solution is not using inheritance and working with squares as if they were rectangles. A factory is used to create differentiated objects, but they are rectangles at the end.
 
