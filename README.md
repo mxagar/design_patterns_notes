@@ -143,15 +143,21 @@ This repository assumes you have experience in Object-Oriented Programming (OOP)
 - Inheritance: classes (children) derived from other classes (parents); `is-a` relationships.
 - Composition: complex objects built using other objects; class built using other classes, i.e. `has-a` relationships.
 - Mixin: we inherit a class from two, they allow for the implementation of specific functionalities to be shared across multiple classes.
-- Interfaces: classes with non-implemented methods, i.e., kind of contracts that define which methods should be implemented in the inherited classes. In Python, interfaces can be defined using abstract base classes (ABCs) with abstract methods
+- Interfaces: classes with non-implemented methods, i.e., kind of contracts that define which methods should be implemented in the inherited classes. In Python, interfaces can be defined using abstract base classes (`from abc import ABC, abstractmethod`) with abstract methods, i.e., using `@abstractmethod`. An abstract method **needs** to be defined in the derived class, otherwise the `TypeError ` is raised at the moment we attempt to create an instance of the subclass.
 - Polymorfism: when a function accepts objects of different classes because they all come from the same parent class; ability of different types of objects to be treated as instances of the same class through inheritance.
 - Abstraction: writing code at higher level hiding details; polymorfism is an example: interfaces don't know anything about the underlying implementation but we use them to pass objects to functions!
 - Dependency Injection: passing one object into another object's methods or constructor, instead of creating it internally.
 - Mocking: passing a minimal implementation that adheres to correct interfaces/signatures for the purpose of testing.
 - Static methods via `@staticmethod`: methods that don't change the object, usually they don't access class attributes.
+- Abstract methods : 
 - Class methods via `@classmethod`: an attribute of the *class* is modified, i.e., same value for all class object instances.
 - Caching via `@functools.lru_cache`: memoization utility, i.e., results of expensive functions (e.g., recursive) are cached in a dictionary.
 - Overloading via `@functools.singledispatch`: different behaviors allowed for the same function signature depending on the type of the arguments.
+- Some other additional points:
+  - Type hints
+  - Keywords like `pass` and ellipsis `...`
+  - Error/exception raising
+  - `Enum`
 
 Python examples:
 
@@ -220,6 +226,9 @@ print(student.to_json())
 ##### -- Interfaces, Polymorphism and Abstraction
 from abc import ABC, abstractmethod
 
+# If we don't inherit from ABC the implementation
+# of the @abstractmethods is not enforced in subclasses
+# and we loose automatic checks from ABC -- but it still works!
 class MyInterface(ABC):
     @abstractmethod
     def needed_method(self) -> str:
@@ -313,6 +322,45 @@ def _(value):
     print("Hello from a list!")
     for item in value:
         print(f"- {item}")
+
+##### -- Type Hints
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+##### -- Pass
+class MyAbstractClass:
+    def do_something(self):
+        pass  # No operation here
+
+def unimplemented_function():
+    ...  # Another placeholder, functionally similar to 'pass' in this context
+
+my_object = MyAbstractClass()
+my_object.do_something()  # Does nothing
+unimplemented_function()  # Also does nothing
+
+##### -- Enum
+from enum import Enum
+
+class Color(Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+
+favorite_color = Color.RED
+print(favorite_color)  # Outputs: Color.RED
+print(favorite_color.name, favorite_color.value)  # Outputs: RED 1
+
+##### -- Error handling
+def divide(x: int, y: int) -> float:
+    if y == 0:
+        raise ValueError("Cannot divide by zero.")
+    return x / y
+
+try:
+    result = divide(10, 0)
+except ValueError as e:
+    print(e)  # Outputs: Cannot divide by zero.
 
 ```
 

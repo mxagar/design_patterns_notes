@@ -568,7 +568,7 @@ use_it(sq)
 
 ## 4. Interface Segregation Principle: `01_SOLID/ISP.cpp`
 
-The idea is to avoid interfaces which are too large.
+The idea is to avoid interfaces which are too large; instead, we define several smaller interfaces (i.e., classes which are not implemented) and inherit them in combination, if necessary.
 
 An example is given with a multi-function printer that is able to print and scan.  
 Instead of implementing a complex interface which provides with the `print()` and `scan()` functions, we break it down to two interfaces that are later used in a third interface.
@@ -645,17 +645,26 @@ struct Machine : IMachine
 ### Python Implementation
 
 ```python
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
-class Machine:
+class Machine(ABC):
+    @abstractmethod # it raises TypeError if subclass doesn't implement method
     def print(self, document):
-        raise NotImplementedError
+        # Alternative to using @abstractmethod: define function with
+        # raise NotImplementedError
+        pass
 
+    @abstractmethod # it raises TypeError if subclass doesn't implement method
     def fax(self, document):
-        raise NotImplementedError
-
+        # Alternative to using @abstractmethod: define function with
+        # raise NotImplementedError
+        pass
+    
+    @abstractmethod # it raises TypeError if subclass doesn't implement method
     def scan(self, document):
-        raise NotImplementedError
+        # Alternative to using @abstractmethod: define function with
+        # raise NotImplementedError
+        pass
 
 # A multi-function device works with all the
 # interfaces from Machine, so it's OK
@@ -690,16 +699,16 @@ class OldFashionedPrinter(Machine):
 ## Solution: we create classes for each functionality and then combine them!
 
 # Abstract class: not to be instantiate, only inherited
-class Printer:
+class Printer(ABC):
     # Abstract method: not implemented
     @abstractmethod
     def print(self, document): pass
 
-class Scanner:
+class Scanner(ABC):
     @abstractmethod
     def scan(self, document): pass
 
-class FaxMachine:
+class FaxMachine(ABC):
     @abstractmethod
     def fax(self, document): pass
 
@@ -765,7 +774,7 @@ printer.scan(123)  # oops!
 
 The Dependency Inversion Principle is based on the following two concepts:
 
-1. High-level modules should not depend on low-level modules. Both should depend on abstractions.
+1. High-level modules should not depend on low-level modules. Both should depend on abstractions, i.e., abstract classes = interfaces.
 2. Abstractions should not depend on details. Details should depend on abstractions.
 
 It is a way of protecting from implementation changes in low-level modules. Note that:
@@ -773,13 +782,17 @@ It is a way of protecting from implementation changes in low-level modules. Note
 - low-level modules/classes are the ones which deal with storage, or similar,
 - high-level modules/classes are the ones which deal with browsing stored objects, or similar.
 
+The idea is to hide to the high-level modules the underlying structures of the low-level structures; we can do that by defining intermmediate modules/functions used by high-level modules that deal with the access to the low-level modules.
+
 Don't confuse it with the *dependency injection*, it doesn't directly relate to it.
 
 Example in python: a constellation of classes which deals with:
 
 - Persons
-- Relationships between them (parent, child, etc.)
-- And a browsing class which researches from stored relationships
+- Relationships between persons (parent, child, etc.); it contains the storing structure (low-level).
+- A browsing class which implements the search in the storing structure (intermediate class).
+- A research class which uses the browser to look for persons related to a person (high-level).
+- The key idea is that: If we change the low-level storing structure the high-level class is not broken; however, we do need to update the intermediate class.
 
 ```python
 from abc import abstractmethod
