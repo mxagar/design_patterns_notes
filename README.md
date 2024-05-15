@@ -180,6 +180,7 @@ This repository assumes you have experience in Object-Oriented Programming (OOP)
   - Keywords like `pass` and ellipsis `...`
   - Error/exception raising
   - `Enum`
+  - Fluent interfaces with chaineable calls
 
 Python examples:
 
@@ -383,6 +384,27 @@ try:
     result = divide(10, 0)
 except ValueError as e:
     print(e)  # Outputs: Cannot divide by zero.
+
+##### -- Fluent interfaces
+class Car:
+    def __init__(self):
+        self.color = None
+        self.brand = None
+
+    def set_color(self, color):
+        self.color = color
+        return self  # Return self to allow chaining
+
+    def set_brand(self, brand):
+        self.brand = brand
+        return self  # Return self to allow chaining
+
+    def __str__(self):
+        return f"Car(Brand={self.brand}, Color={self.color})"
+
+# Usage
+my_car = Car().set_color('red').set_brand('Toyota')
+print(my_car)  # Outputs: Car(Brand=Toyota, Color=red)
 
 ```
 
