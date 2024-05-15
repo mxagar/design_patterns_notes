@@ -34,10 +34,13 @@ The **Builder** provides an API for constructing an object step-by-step: when pi
 
 See notebook: [`Creational_Patterns.ipynb`](./02_Creational_Patterns/Creational_Patterns.ipynb).
 
+Different examples are provided: an HTML builder, a Car builder and a Person builder. In general:
 
-
-
-
+- We have an Object class and a Builder class which builds those objects.
+- The Builder has methods that added components to the Object.
+- We can either explicitly use the Builder or return it from the Object using a `create()` static method.
+- We can make the builder fluent so that the methods that add components are chained.
+- Different facets of an Object can be built with different Builder classes that work in tandem.
 
 ## 2. Factories
 
