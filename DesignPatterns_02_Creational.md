@@ -42,6 +42,58 @@ Different examples are provided: an HTML builder, a Car builder and a Person bui
 - We can make the builder fluent so that the methods that add components are chained.
 - Different facets of an Object can be built with different Builder classes that work in tandem.
 
+In the following, only the Car example is provided; check the notebook for more.
+
+```python
+class Car:
+    def __init__(self):
+        self.features = []
+
+    def add_feature(self, feature):
+        self.features.append(feature)
+
+    def __str__(self):
+        return ', '.join(self.features)
+
+class CarBuilder:
+    def __init__(self):
+        self.car = Car()
+
+    def add_engine(self, engine):
+        self.car.add_feature(f"Engine: {engine}")
+        return self
+
+    def add_wheels(self, wheels):
+        self.car.add_feature(f"Wheels: {wheels}")
+        return self
+
+    def add_gps(self):
+        self.car.add_feature("GPS: Installed")
+        return self
+
+    def build(self):
+        return self.car
+
+class Director:
+    def construct_sports_car(self, builder):
+        return builder.add_engine('V8').add_wheels('Sports').add_gps().build()
+
+    def construct_family_car(self, builder):
+        return builder.add_engine('V4').add_wheels('Regular').add_gps().build()
+
+# Usage
+director = Director()
+sports_car_builder = CarBuilder()
+family_car_builder = CarBuilder()
+
+sports_car = director.construct_sports_car(sports_car_builder)
+family_car = director.construct_family_car(family_car_builder)
+
+print(sports_car)  # Engine: V8, Wheels: Sports, GPS: Installed
+print(family_car)  # Engine: V4, Wheels: Regular, GPS: Installed
+
+```
+
 ## 2. Factories
 
 ## 3. Prototype
