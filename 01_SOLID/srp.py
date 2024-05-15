@@ -1,3 +1,9 @@
+"""From the Udemy course "Design Patterns in Python"
+https://www.udemy.com/course/design-patterns-python
+by Dmitri Nesteruk.
+
+SOLID Principles: Single Responsibility Principle
+"""
 class Journal:
     def __init__(self):
         self.entries = []
