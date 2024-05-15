@@ -1,3 +1,9 @@
+"""From the Udemy course "Design Patterns in Python"
+https://www.udemy.com/course/design-patterns-python
+by Dmitri Nesteruk.
+
+SOLID Principles: Open Closed Principle
+"""
 from enum import Enum
 
 # The Enum base class

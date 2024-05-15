@@ -1,3 +1,9 @@
+"""From the Udemy course "Design Patterns in Python"
+https://www.udemy.com/course/design-patterns-python
+by Dmitri Nesteruk.
+
+SOLID Principles: Liskov Substitution Principle
+"""
 class Rectangle:
     def __init__(self, width, height):
         # We add _ to signal that these are private
