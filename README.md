@@ -63,42 +63,64 @@ This guide compiles all the patterns defined in the book by the Gang of Four and
 
 1. **SOLID Design Principles**
 
-   - Single Responsibility
-   - Open-Closed
-   - Liskov Substitution
-   - Interface Segregation
-   - Dependency Inversion
+- Single Responsibility
+- Open-Closed
+- Liskov Substitution
+- Interface Segregation
+- Dependency Inversion
 
-2. **Creational Patterns**
+1. **Creational Patterns**
 
-   - Builder
-   - Factories: Abstract, Factory Method
-   - Prototype
-   - Singleton
+Creational patterns deal with the creation/construction of objects:
 
-3. **Structural Patterns**
+- The creation can be explicit (e.g., via constructors) of implicit (e.g., dependency injection, reflection, etc.).
+- The creation can be wholesale (single statement creates the object) or piecewise, i.e., it is done step-by-step in a more complicated process.
 
-   - Adapter
-   - Bridge
-   - Composite
-   - Decorator
-   - Facade
-   - Flyweight
-   - Proxy
+Patterns:
 
-4. **Behavioral Patterns**
+- Builder
+- Factories: Abstract, Factory Method
+- Prototype
+- Singleton
 
-   - Chain of Responsibility
-   - Command
-   - Interpreter
-   - Iterator
-   - Mediator
-   - Memento
-   - Observer
-   - State
-   - Strategy
-   - Template Method
-   - Visitor
+1. **Structural Patterns**
+
+Structural patterns deal with the structure of objects:
+
+- Class members, adherence to interfaces, etc.
+- Many patterns are wrappers that mimic the underlying class interface.
+- Stress the importance of good API design: usability, etc.
+
+Patterns:
+
+- Adapter
+- Bridge
+- Composite
+- Decorator
+- Facade
+- Flyweight
+- Proxy
+
+1. **Behavioral Patterns**
+
+Behavioral patterns don't really follow any central theme:
+
+- They are all different.
+- Sometimes they overlap in their function, i.e., the goal they achieve, but the underlying mechanisms are different.
+  
+Patterns:
+
+- Chain of Responsibility
+- Command
+- Interpreter
+- Iterator
+- Mediator
+- Memento
+- Observer
+- State
+- Strategy
+- Template Method
+- Visitor
 
 Nesteruk warns that, for the sake of simplicity, there are some simplifications in his examples: liberal use of public members, lack of virtual destructors, passing/returning by value, lack of move operations...
 

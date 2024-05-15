@@ -11,6 +11,11 @@ See the overview file [`README.md`](README.md) for more information on the origi
 
 In the present guide, the **Behavioral Patterns** are defined and examples are given.
 
+Behavioral patterns don't really follow any central theme:
+
+- They are all different.
+- Sometimes they overlap in their function, i.e., the goal they achieve, but the underlying mechanisms are different.
+
 Table of Contents:
 
 - [Design Patterns: Behavioral Patterns](#design-patterns-behavioral-patterns)

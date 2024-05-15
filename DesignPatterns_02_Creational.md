@@ -24,6 +24,21 @@ Table of contents:
 
 ## 1. Builder
 
+Sometimes objects are easy to create and they are built witha single initializer call. However, in some other cases creating an object is more complicated
+
+- it requires several steps
+- or it dozens of parameters are involved
+- or a piecewise construction is required.
+
+The **Builder** provides an API for constructing an object step-by-step: when piecewise object construction is complicated, it provides an API for doing it succinctly.
+
+See notebook: [`Creational_Patterns.ipynb`](./02_Creational_Patterns/Creational_Patterns.ipynb).
+
+
+
+
+
+
 ## 2. Factories
 
 ## 3. Prototype
