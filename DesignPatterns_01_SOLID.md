@@ -570,6 +570,8 @@ use_it(sq)
 
 The idea is to avoid interfaces which are too large; instead, we define several smaller interfaces (i.e., classes which are not implemented) and inherit them in combination, if necessary.
 
+The principle is related to the *YAGNI* expression: *You Ain't Going to Need It*.
+
 An example is given with a multi-function printer that is able to print and scan.  
 Instead of implementing a complex interface which provides with the `print()` and `scan()` functions, we break it down to two interfaces that are later used in a third interface.
 
