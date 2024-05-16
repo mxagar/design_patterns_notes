@@ -34,13 +34,14 @@ The **Builder** provides an API for constructing an object step-by-step: when pi
 
 See notebook: [`Creational_Patterns.ipynb`](./02_Creational_Patterns/Creational_Patterns.ipynb).
 
-Different examples are provided: an HTML builder, a Car builder and a Person builder. In general:
+Different examples are provided: an HTML builder, a Car builder, a Person builder and a Product builder. In general:
 
 - We have an Object class and a Builder class which builds those objects.
 - The Builder has methods that added components to the Object.
 - We can either explicitly use the Builder or return it from the Object using a `create()` static method.
 - We can make the builder fluent so that the methods that add components are chained.
 - Different facets of an Object can be built with different Builder classes that work in tandem.
+- We can define a Director class which `constructs()` different types of Objects.
 
 In the following, only the Car example is provided; check the notebook for more.
 
@@ -91,6 +92,74 @@ family_car = director.construct_family_car(family_car_builder)
 
 print(sports_car)  # Engine: V8, Wheels: Sports, GPS: Installed
 print(family_car)  # Engine: V4, Wheels: Regular, GPS: Installed
+
+```
+
+Another example, taken from [All 23 OOP software design patterns with examples in Python](https://medium.com/@cautaerts/all-23-oop-software-design-patterns-with-examples-in-python-cac1d3f4f4d5):
+
+- **Product**: This is the complex object under construction. It contains the parts that make up the product.
+
+- **Builder**: The Builder defines the abstract interface for creating parts of the Product object. It declares the construction steps that are common to all types of builders. This allows the Director to construct products using any builder that implements this interface, without knowing the specific details of the construction process.
+
+- **ConcreteBuilder**: The ConcreteBuilder implements the Builder interface and provides specific implementations for the construction steps. It keeps track of the product it creates and is responsible for assembling the parts into the final product. It knows the specifics of the parts it is supposed to create and how to assemble them.
+
+- **Director**: The Director is responsible for managing the construction process. It uses a Builder instance to construct a product step-by-step. The Director doesn’t need to know the details of the product's construction, it only needs to ensure that the construction steps are followed in the correct order.
+
+```python
+from abc import ABC, abstractmethod
+from typing import List
+
+class Product:
+   def __init__(self) -> None:
+       self._parts: List[str] = []
+
+   def add_part(self, part: str) -> None:
+       self._parts.append(part)
+
+   def get_parts(self) -> List[str]:
+       return self._parts
+
+class Builder(ABC):
+    @abstractmethod
+    def build_part_a(self) -> None:
+        pass
+
+    @abstractmethod
+    def build_part_b(self) -> None:
+        pass
+
+    @abstractmethod
+    def get_result(self) -> Product:
+        pass
+
+class ConcreteBuilder(Builder):
+    def __init__(self) -> None:
+        self.product = Product()
+
+    def build_part_a(self) -> None:
+        self.product.add_part("Part A")
+
+    def build_part_b(self) -> None:
+        self.product.add_part("Part B")
+
+    def get_result(self) -> Product:
+        return self.product
+
+class Director:
+    def __init__(self, builder: Builder) -> None:
+        self._builder = builder
+
+    def construct(self) -> None:
+        self._builder.build_part_a()
+        self._builder.build_part_b()
+
+# Example usage
+builder = ConcreteBuilder()
+director = Director(builder)
+director.construct()
+product = builder.get_result()
+
+print(product.get_parts())  # Output: ['Part A', 'Part B']
 
 ```
 
