@@ -34,7 +34,14 @@ The **Builder** provides an API for constructing an object step-by-step: when pi
 
 See notebook: [`Creational_Patterns.ipynb`](./02_Creational_Patterns/Creational_Patterns.ipynb).
 
-Different examples are provided: an HTML builder, a Car builder, a Person builder and a Product builder. In general:
+Different examples are provided: 
+
+- an HTML builder (in the notebook),
+- a Car builder (below),
+- a Person builder (in the notebook),
+- and a Product builder (below). 
+
+In general:
 
 - We have an Object class and a Builder class which builds those objects.
 - The Builder has methods that added components to the Object.
@@ -43,7 +50,7 @@ Different examples are provided: an HTML builder, a Car builder, a Person builde
 - Different facets of an Object can be built with different Builder classes that work in tandem.
 - We can define a Director class which `constructs()` different types of Objects.
 
-In the following, only the Car example is provided; check the notebook for more.
+**Car example**:
 
 ```python
 class Car:
@@ -95,7 +102,7 @@ print(family_car)  # Engine: V4, Wheels: Regular, GPS: Installed
 
 ```
 
-Another example, taken from [All 23 OOP software design patterns with examples in Python](https://medium.com/@cautaerts/all-23-oop-software-design-patterns-with-examples-in-python-cac1d3f4f4d5):
+**Product example**, taken from [All 23 OOP software design patterns with examples in Python](https://medium.com/@cautaerts/all-23-oop-software-design-patterns-with-examples-in-python-cac1d3f4f4d5):
 
 - **Product**: This is the complex object under construction. It contains the parts that make up the product.
 
@@ -164,6 +171,109 @@ print(product.get_parts())  # Output: ['Part A', 'Part B']
 ```
 
 ## 2. Factories
+
+A Factory is a component responsible solely for the wholesale (not piecewise) creation of objects.
+
+- Sometimes object creation logic becomes too convoluted.
+- Class initialization with `__init__()` is indeed a bit limited:
+  - Name is always `__init__()`.
+  - Cannot be overloaded with same sets of arguments with different names
+  - Can turn into an optional parameter hell.
+- Solution: Factories - wholesale object creation (non-piecewise, i.e., not defined in steps, unlike Builder) that can be outsourced to
+  - a set separate methods: **factory methods**;
+  - that can may exist in a separate class **Factory**, which contains the factory methods;
+  - And we can create a hierarchy of factories, i.e., **Abstract Factories**, which are factory classes created for abstract and derived object classes.
+
+Notebook: [`Creational_Patterns.ipynb`](./02_Creational_Patterns/Creational_Patterns.ipynb)
+
+In the notebook, two examples are shown to illustrate the abovementioned 3 concepts:
+
+- Point class (summarized below): Factory Methods & Classes
+- Hot drink class: Abstract Factory (in the notebook).
+
+**Point example**:
+
+```python
+from enum import Enum
+import math
+
+class CoordinateSystem(Enum):
+    CARTESIAN = 1
+    POLAR = 2
+    
+class Point:
+    # For the same point object
+    # depending on a flag, the arguments
+    # are treated differently
+    # to deal with a more complex constructor.
+    # (Recall in Python we cannot overload constructors).
+    # BUT that's bad, because it complicates the usage
+    # and everything is more confusing
+    def __init__(self, a, b, system=CoordinateSystem.CARTESIAN):
+        if system == CoordinateSystem.CARTESIAN:
+            self.x = a
+            self.y = b
+        elif system == CoordinateSystem.POLAR:
+            self.x = a * math.sin(b)
+            self.y = a * math.cos(b)
+
+
+# We create factory methods (static methods)
+# inside the object Point class
+# which deal with the correct coordinate system
+# and return an object of the class itself!
+class Point:
+    def __init__(self, x, y):
+       self.x = x
+       self.y = y
+
+    # Factory method 1
+    @staticmethod
+    def new_cartesian_point(x, y):
+        return Point(x, y)
+
+    # Factory method 2
+    @staticmethod
+    def new_polar_point(rho, theta):
+        return Point(rho * math.sin(theta), rho * math.cos(theta))
+
+    def __str__(self):
+        return f'x: {self.x}, y: {self.y}'
+
+# Usage
+p1 = Point(2, 3, CoordinateSystem.CARTESIAN) # Extended constructor
+p2 = Point.new_cartesian_point(1, 2) # Factory Method 1
+p2 = Point.new_polar_point(3, 0.707) # Factory Method 2
+print(p1)
+print(p2)
+
+# When we start having many factory methods
+# it makes sense to build a class with all of them;
+# that way, everything is more organized and clear.
+# Since the Factory class is separate from the Object class
+# if we want to make sure that it is not lost
+# we can even include it into the object class itself
+class Point:
+    def __init__(self, x, y):
+       self.x = x
+       self.y = y
+
+    def __str__(self):
+        return f'x: {self.x}, y: {self.y}'
+
+    class Factory:
+        @staticmethod
+        def new_cartesian_point(x, y):
+            return Point(x, y)
+
+        @staticmethod
+        def new_polar_point(rho, theta):
+            return Point(rho * math.sin(theta), rho * math.cos(theta))
+
+# Usage
+p4 = Point.Factory.new_polar_point(1, 0.5) # Object -> Factory Class -> Factory Method
+print(p4)
+```
 
 ## 3. Prototype
 
