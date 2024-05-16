@@ -187,11 +187,20 @@ Python examples:
 ```python
 ##### -- Classes, Objects, Attributes, Methods, Constructors, Encapsulation
 class Person:
-    def __init__(self, name):
+    def __init__(self, name, id=None):
+        if id is None:
+            id = uuid.uuid4()
         # In Python all members are public
         # but as convention to denote one to be used as private
         # we can use a leading _
         self._name = name
+        # If we precede a class attribute with __
+        # Python carries out name mangling, so the variable
+        # is even more difficult to be accessed,
+        # i.e., it seems to be really private.
+        # However, it is really still accessible via
+        # object._ClassName__variableName
+        self.__id = id
     
     @property
     def name(self):
@@ -202,6 +211,19 @@ class Person:
         if not value:
             raise ValueError("Name cannot be empty")
         self._name = value
+
+    @property
+    def id(self):
+        return self.__id  
+
+
+person = Person("Alice")
+print(person.name)  # Output: Alice
+person.name = "Bob"
+print(person.name)  # Output: Bob
+print(person.id)  # Output: The UUID value (e.g., 123e4567-e89b-12d3-a456-426614174000)
+# Accessing the private variable via name mangling
+print(person._Person__id)  # Output: The same UUID value as above
 
 
 ##### -- Inheritance
