@@ -385,7 +385,7 @@ my_object.do_something()  # Does nothing
 unimplemented_function()  # Also does nothing
 
 ##### -- Enum
-from enum import Enum
+from enum import Enum, auto
 
 class Color(Enum):
     RED = 1
@@ -395,6 +395,13 @@ class Color(Enum):
 favorite_color = Color.RED
 print(favorite_color)  # Outputs: Color.RED
 print(favorite_color.name, favorite_color.value)  # Outputs: RED 1
+
+# With auto() we don't need to assign a value
+class Drink(Enum):
+    COFFEE = auto()
+    TEA = auto()
+    JUICE = auto()
+    WATER = auto()
 
 ##### -- Error handling
 def divide(x: int, y: int) -> float:
