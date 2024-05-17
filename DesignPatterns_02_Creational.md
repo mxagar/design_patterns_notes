@@ -21,6 +21,10 @@ Table of contents:
   - [2. Factories](#2-factories)
   - [3. Prototype](#3-prototype)
   - [4. Singleton](#4-singleton)
+    - [Singleton Allocator](#singleton-allocator)
+    - [Singleton Decorator](#singleton-decorator)
+    - [Singleton Metaclass](#singleton-metaclass)
+    - [Monostate Singleton](#monostate-singleton)
 
 ## 1. Builder
 
@@ -356,3 +360,221 @@ print(john) # John works at 123B East Dr, 0, London
 
 ## 4. Singleton
 
+The Gang of Four have expressed that if they had to drop a design pattern, that would be the *Singleton*, because it is often times a design smell.
+
+Singletons are useful for system components that usually should have one instance which should be initialized only once; so the goal of the Singleton is to prevent the user from initializing multiple instances:
+
+- Database repositories
+- Object factories
+- etc.
+
+Why do we need only one instance?
+
+- Initializers are expensive
+  - We only do it once
+  - We provide everyone with the same instance
+- We want to prevent anyone creating additional copies
+- We need to take care of lazy instantiation: Usually, we initialize the Singleton whe it is needed, i.e., we don't initialize it preventitively.
+
+There are many ways to implement a Singleton in Python:
+
+- The Singleton Allocator: the `__new__` is overwritten to allow a unique instance.
+- The **Singleton Decorator** (recommended): a decorator tracks instantiated classes ina dictionary and allows only one instance per instantiated class.
+- The **Singleton Metaclass** (recommended): a Singleton Metaclass is defined which re-implements `__call__` and it is passed as the `metaclass` parent to the target classes.
+- The Monostate Singleton: a class-level shared state is assigned to every new class instance in the `__init__` implementation.
+
+The main issue with Singletons is that only one instance of them exists. Therefore, if we want to carry out tests, we might be tied to them. In those cases, we inject into the tests a dummy object which has the same interfaces as the Singleton (e.g., a dummy database).
+
+### Singleton Allocator
+
+In Python, we can implement Singletons by controlling the **constructor** `__init__` and the **allocator** `__new__`. We make sure that only one instance is allocated. However, the constructor `__init__` is going to be called every time we try to re-instantiate the class, even though we will keep having only one object. Thus, to avoid problems, we should keep `__init__` empty.
+
+```python
+class Database:
+    # Class-level variable which contains
+    # a Database object!
+    _instance = None
+
+    # The Singleton occurs here: 
+    # we allow only one instance of the class
+    # Every time we create an object
+    # - first __new__ is called
+    # - then __init__ is called
+    # Since __new__ overrides the object creation
+    # we will have only one object.
+    # BUT: We need to keep __init__ empty
+    # to avoid any
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Database, cls).__new__(cls)
+            cls._instance._initialize(*args, **kwargs)
+        return cls._instance
+
+    def __init__(self, *args, **kwargs):
+        # We need to keep it, but empty
+        # It will be called every time we instantiate Database()
+        pass
+    
+    def _initialize(self, *args, **kwargs):
+        # We would perform any initialization here
+        # This is our custom constructor which will be called
+        # only once, in contrast to __init__, which will be
+        # called every time we instantiate Database()
+        print("*args: ", args)
+        print("**kwargs: ", kwargs)
+
+    @property
+    def initialized(self):
+        return self._instance is not None
+
+
+## __main__
+d1 = Database(a=1, b=2) # Called: __new__, _initialize, __init__
+d2 = Database() # Called: __new__, __init__; BUT: Nothing built!
+
+print(id(d1), id(d2)) # Same memory id
+print(d1 is d2) # True
+
+```
+
+
+### Singleton Decorator
+
+Another way of implementing a Singleton is via decorators. We define a decorator function which keeps track of all class instances in a dictionary. If the class has been instantiated, then we return it, otherwise we create it and return it. This method avoids the issue of calling `__init__` every time we try to instantiate a class.
+
+This approach seems cleaner than the previous one, but it has some disadvantages:
+
+- If we use `@singleton` for many classes, the dictionary will grow; the `instances` dictionary is kept in the global scope.
+- The approach is not currently thread-safe, but it could be done easily using the `threding` module.
+
+```python
+def singleton(class_):
+    # The instances dictionary persists
+    # across multiple calls 
+    # because it is part of the closure created 
+    # by the singleton decorator. 
+    # This means that even though get_instance 
+    # is called multiple times, 
+    # it always has access to the same instances dictionary.
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+        return instances[class_]
+
+    return get_instance
+
+@singleton
+class Database:
+    def __init__(self):
+        print('Loading database') # Now, this will be called 1x
+
+# __main__
+d1 = Database()
+d2 = Database()
+print(d1 == d2)
+```
+
+### Singleton Metaclass
+
+Metaclasses allow to modify the implementation of the special methods in a class, e.g., `__new__` or `__call__`. Thus, we can leverage that to create a Singleton Metaclass that overrides `__call__` to ensure that only one instance of the class is created!
+
+```python
+class Singleton(type):
+    """Metaclass that creates a Singleton base type when called."""
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls)\
+                .__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class Database(metaclass=Singleton):
+    def __init__(self):
+        print('Loading database')
+
+# __main__
+d1 = Database()
+d2 = Database()
+print(d1 == d2)
+```
+
+### Monostate Singleton
+
+A Monostate Singleton is a type pf Singleton which works assigning a pre-defined single stated defined as a class-level variable in the class. However, this approach is not the recommended one, because it's a little bit clumsy. Better use the Metaclass or the decorator.
+
+```python
+class CEO:
+    # Class-level variable shared among all objects
+    # We add __ so that it is not directly accessible
+    __shared_state = {
+        'name': 'Steve',
+        'age': 55
+    }
+
+    def __init__(self):
+        # The __dict__ dictionary of an object contains
+        # ALL the attributes of the class object
+        # thus, here we replace all the attributes by the class-level state
+        self.__dict__ = self.__shared_state
+
+    def __str__(self):
+        return f'{self.name} is {self.age} years old'
+
+# __main__
+ceo1 = CEO()
+print(ceo1)
+
+ceo1.age = 66
+print(ceo1)
+
+ceo2 = CEO()
+ceo2.age = 77
+print(ceo1)
+print(ceo2)
+
+
+# We can implement the aproach more generically
+# by defning a Monostate parent class
+# which re-implements __new__
+# Then, it is inherited by other concrete classes
+class Monostate:
+    _shared_state = {}
+
+    def __new__(cls, *args, **kwargs):
+        obj = super(Monostate, cls).__new__(cls, *args, **kwargs)
+        obj.__dict__ = cls._shared_state
+        return obj
+
+
+class CFO(Monostate):
+    def __init__(self):
+        self.name = 'NoName'
+        self.money_managed = 0
+
+    def __str__(self):
+        return f'{self.name} manages ${self.money_managed}bn'
+
+cfo1 = CFO()
+
+print(cfo1) # NoName manages $0bn
+
+# No we set the values
+# but really we are accessing the _shared_state
+cfo1.name = 'Sheryl'
+cfo1.money_managed = 1
+print(cfo1._shared_state) # {'name': 'Sheryl', 'money_managed': 1}
+
+print(cfo1) # Sheryl manages $1bn
+
+cfo2 = CFO()
+# We set the attribute values -> we're changing the _shared_state
+cfo2.name = 'Ruth'
+cfo2.money_managed = 10
+print(cfo1._shared_state) # {'name': 'Ruth', 'money_managed': 10}
+
+print(cfo1, cfo2, sep='; ') # Ruth manages $10bn; Ruth manages $10bn
+```
