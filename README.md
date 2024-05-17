@@ -164,10 +164,12 @@ Similarly, this repository assumes you have practical experience in Object-Orien
 
 - Classes and objects
   - Constructor: `__init__`
-  - Attributes (i.e., state): `@property`
+  - Attributes (i.e., state): `@property`, `self.__dict__`, `@attribute.setter`.
   - Methods
+  - Special methods (*dunder*): `__init__`, `__repr__`, `__str__`, `__call__`, `__getitem__`, `__setitem__`, `__enter__`, `__exit__`, etc.
 - Encapsulation: public and private data and methods, grouped together; properties, getters and setters.
 - Inheritance: classes (children) derived from other classes (parents); `is-a` relationships.
+  - `super()`: It gets the parent class of the class and it's often used to call its special methods, e.g., teh constructor `__init__()`. If the class was not inherited, it implicitly inherits from `object`, so the call doesn't raise an error.
 - Composition: complex objects built using other objects; class built using other classes, i.e. `has-a` relationships.
 - Mixin: we inherit a class from two, they allow for the implementation of specific functionalities to be shared across multiple classes.
 - Interfaces: classes with non-implemented methods, i.e., kind of contracts that define which methods should be implemented in the inherited classes. In Python, interfaces can be defined using abstract base classes (`from abc import ABC, abstractmethod`) with abstract methods, i.e., using `@abstractmethod`. An abstract method **needs** to be defined in the derived class, otherwise the `TypeError ` is raised at the moment we attempt to create an instance of the subclass.
@@ -180,6 +182,7 @@ Similarly, this repository assumes you have practical experience in Object-Orien
 - Class methods via `@classmethod`: an attribute of the *class* is modified, i.e., same value for all class object instances.
 - Caching via `@functools.lru_cache`: memoization utility, i.e., results of expensive functions (e.g., recursive) are cached in a dictionary.
 - Overloading via `@functools.singledispatch`: different behaviors allowed for the same function signature depending on the type of the arguments.
+- Metaclasses: a class of a class that defines how a class behaves; as objects are instances of classes, classes are instances of metaclasses.
 - Some other additional points:
   - Type hints
   - Keywords like `pass` and ellipsis `...`
@@ -373,6 +376,45 @@ def _(value):
     print("Hello from a list!")
     for item in value:
         print(f"- {item}")
+
+##### -- Metaclasses
+
+# Metaclass = a class of a class that defines 
+# how a class behaves.
+# As objects are instances of classes,
+# classes are instances of metaclasses.
+
+# Metaclasses are created by inheriting from type
+# The implementation of special methods can be changed with them!
+class MyMeta(type):
+    def __new__(cls, name, bases, dct):
+        print(f"Creating class {name}")
+        return super(MyMeta, cls).__new__(cls, name, bases, dct)
+
+    def __init__(cls, name, bases, dct):
+        print(f"Initializing class {name}")
+        super(MyMeta, cls).__init__(name, bases, dct)
+
+    def __call__(cls, *args, **kwargs):
+        print(f"Creating instance of {cls.__name__}")
+        return super(MyMeta, cls).__call__(*args, **kwargs)
+
+# Metaclasses are used by passing them as metaclass
+class MyClass(metaclass=MyMeta):
+    def __init__(self, value):
+        self.value = value
+
+    def show(self):
+        print(f"MyClass instance with value: {self.value}")
+
+# Creating an instance of MyClass
+obj = MyClass(42)
+obj.show()
+# Output:
+#   Creating class MyClass
+#   Initializing class MyClass
+#   Creating instance of MyClass
+#   MyClass instance with value: 42
 
 ##### -- Type Hints
 def greet(name: str) -> str:
