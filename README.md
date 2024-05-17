@@ -181,6 +181,7 @@ This repository assumes you have experience in Object-Oriented Programming (OOP)
   - Error/exception raising
   - `Enum`
   - Fluent interfaces with chaineable calls
+  - Deep copies
 
 Python examples:
 
@@ -434,6 +435,13 @@ class Car:
 # Usage
 my_car = Car().set_color('red').set_brand('Toyota')
 print(my_car)  # Outputs: Car(Brand=Toyota, Color=red)
+
+##### -- Deep copies
+import copy
+
+car_vw = Car().set_color('red').set_brand('VW')
+car_vw_2 = car_vw # This is not a real copy! Car is mutable, so we assign a pointer!
+car_vw_3 = copy.deepcopy(car_vw) # This is a real copy, new bytes in memory!
 
 ```
 
