@@ -155,11 +155,16 @@ I use `conda` environments.
 
 ## Object Oriented Programming (OOP)
 
-This repository assumes you have experience in Object-Oriented Programming (OOP). Here's a reminder of the most important concepts in Python.
+This repository assumes you have an intermmediate-advanced level in Python and software engineering. Here are two links of guides I made on selected topics that might be of your interest:
+
+- [Data Structures in Python](https://github.com/mxagar/data_structures_algorithms_udemy/blob/master/Python_DSAlgo_Guide.md)
+- [Python Tips and Tricks](https://github.com/mxagar/data_structures_algorithms_udemy/blob/master/Python_DSAlgo_Guide.md#10-python-tips--tricks)
+
+Similarly, this repository assumes you have practical experience in Object-Oriented Programming (OOP). Here's a reminder of the most important concepts in OOP focusing on Python:
 
 - Classes and objects
-  - Constructor
-  - Attributes (i.e., state)
+  - Constructor: `__init__`
+  - Attributes (i.e., state): `@property`
   - Methods
 - Encapsulation: public and private data and methods, grouped together; properties, getters and setters.
 - Inheritance: classes (children) derived from other classes (parents); `is-a` relationships.
@@ -457,7 +462,7 @@ car_vw_3 = copy.deepcopy(car_vw) # This is a real copy, new bytes in memory!
 
 ## Authorship
 
-Original code and examples primarily from from Dmitri Nesteruk.
+Original code and examples primarily from Dmitri Nesteruk.
 
 Code modifications and notes: Mikel Sagardia, 2022.  
 No guaranties.
