@@ -277,5 +277,82 @@ print(p4)
 
 ## 3. Prototype
 
+Prototype: We use them when it's easier to copy an existing object to fully initialize a new one. Thus, a Prototype is a partially or fully initialized object that we copy (*clone*) and make use of it:
+
+- Complicated objects (e.g., cars) aren't designed from scratch.
+  - They reiterate existing designs.
+- An existing (partially or fully constructed) design is a Prototype.
+- We want to copy it (*clone*), customize it, and start using it.
+  - It requires a *deep copy* support, i.e., a wholesale copy.
+  - Maybe the entire object is not created in the Prototype, but some parts only.
+- We make the *cloning* convenient: e.g., via a Factory:
+  - We define the Object class we'd like to clone.
+  - We deine a Factory class for it.
+  - In the Factory class, we partially construct some object templates.
+  - For each object template, we create static factory methods.
+  - Each static factory method clones == deep copies a template and customizes it.
+  - We have a nice and easy API for the users that creates complex objects with few lines of code.
+
+Notebook: [`Creational_Patterns.ipynb`](./02_Creational_Patterns/Creational_Patterns.ipynb).
+
+```python
+import copy
+
+# Let's take the example of classes
+# for which we would like to have already
+# pre-conigured object instances
+class Address:
+    def __init__(self, street_address, city, country):
+        self.country = country
+        self.city = city
+        self.street_address = street_address
+
+    def __str__(self):
+        return f'{self.street_address}, {self.city}, {self.country}'
+    
+class Employee:
+    def __init__(self, name, address):
+        self.address = address
+        self.name = name
+
+    def __str__(self):
+        return f'{self.name} works at {self.address}'
+
+# To build from prototypes, we define a factory
+# which contains pre-configured templates of an object
+class EmployeeFactory:
+    # These are the prototypes which belong to the class,
+    # i.e., the same for all class objects
+    # since they are not defined in self
+    main_office_employee = Employee("", Address("123 East Dr", 0, "London"))
+    aux_office_employee = Employee("", Address("123B East Dr", 0, "London"))
+
+    @staticmethod
+    def __new_employee(proto, name, suite):
+        result = copy.deepcopy(proto)
+        result.name = name
+        result.address.suite = suite
+        return result
+
+    @staticmethod
+    def new_main_office_employee(name, suite):
+        return EmployeeFactory.__new_employee(
+            EmployeeFactory.main_office_employee,
+            name, suite
+        )
+
+    @staticmethod
+    def new_aux_office_employee(name, suite):
+        return EmployeeFactory.__new_employee(
+            EmployeeFactory.aux_office_employee,
+            name, suite
+        )
+
+john = EmployeeFactory.new_aux_office_employee("John", 200)
+jane = EmployeeFactory.new_main_office_employee("Jane", 200)
+print(jane) # Jane works at 123 East Dr, 0, London
+print(john) # John works at 123B East Dr, 0, London
+```
+
 ## 4. Singleton
 
