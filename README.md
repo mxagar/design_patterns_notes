@@ -79,9 +79,9 @@ Creational patterns deal with the creation/construction of objects:
 Patterns:
 
 - Builder
-- Factories: Abstract, Factory Method
-- Prototype
-- Singleton
+- Factories: Abstract, Factory Method and Class
+- Prototype (Factory)
+- Singleton: Allocator, Decorator, Metaclass, Monostate
 
 1. **Structural Patterns**
 
