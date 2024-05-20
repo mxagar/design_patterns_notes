@@ -25,6 +25,8 @@ Table of Contents:
     - [Adapter with Caching](#adapter-with-caching)
   - [2. Bridge](#2-bridge)
   - [3. Composite](#3-composite)
+    - [Example: Geometric Shapes](#example-geometric-shapes)
+    - [Example: Neural Networks](#example-neural-networks)
   - [4. Decorator](#4-decorator)
   - [5. Facade](#5-facade)
   - [6. Flyweight](#6-flyweight)
@@ -342,7 +344,206 @@ square.draw()
 
 ## 3. Composite
 
-TBD.
+The goal of a Composite is to treat individual/scalar and aggregate/collection objects uniformly:
+
+- Objects use other object's properties/members through inheritance and composition.
+- Composition lets us make compound objects.
+  - Example: a mathematical expression composed of simple expressions or a grouping of shapes that consists of several shapes.
+- **The Composite design pattern is used to treat both single (scalar) and composite objects uniformly.**
+  - That is: a scalar/single object and a collection/sequence structure that containes those objects have common APIs.
+
+Note: scalar is used here in the sense of a single object (e.g., a class or a object of a class), whereas group means a collection (e.g., a list).
+
+The main difference between a scalar/single object and a group/collection object which can contain both the scalar/single objects and groups is **iteration**. Therefore, we need to somehow support iteration in the Composite:
+
+- We can do that by defining the scalar objects as classes that contain iterables.
+- Or we can also do that by defining the `__iter__` method in the scalar object.
+
+### Example: Geometric Shapes
+
+The Composite pattern allows to compose objects into tree structures to represent part-whole hierarchies. It lets clients treat individual objects and compositions of objects uniformly. Key components, focusing on the example of the **Geometric Shapes**:
+
+- **Component**: The base class (`GraphicObject` in the example with the Geometric Shapes) represents both individual objects and their compositions.
+
+- **Leaf**: The individual objects that can be part of a composition. In the following example, `Circle` and `Square` are leaf objects.
+
+- **Composite**: The composite objects that can contain other objects. In the following example, `GraphicObject` itself acts as a composite that can contain other `GraphicObject` instances.
+
+In the example of the Geometric Shapes, the coposite pattern is accomplised thanks to 3-4 key points:
+
+- We define a member list which contains children: `self.children = []`
+- We add derived class objects to the `children` list, as well as the `GraphicObject` type itsself, creating nested structures.
+- We apply a recursive printing `_print` that traverses all the children and the children of the children; that's a depth-first tree traverse.
+
+```python
+# This base class can be 2 things:
+# a single shape (derived) or a group/collection of shapes
+class GraphicObject:
+    def __init__(self, color=None):
+        self.color = color
+        self.children = [] # Key line for Composite
+        self._name = 'Group' # We will override the name in inherited shapes
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+
+    # We create a list of ObjectColor items
+    # preceeded by the depth represented with the number of *
+    # This recursive function is a tree traverse
+    # and it's a key part of the Composite pattern
+    def _print(self, items, depth):
+        items.append('*' * depth)
+        if self.color:
+            items.append(self.color)
+        items.append(f'{self.name}\n')
+        for child in self.children:
+            child._print(items, depth + 1)
+
+    def __str__(self):
+        items = []
+        self._print(items, 0)
+        return ''.join(items)
+
+
+class Circle(GraphicObject):
+    @property
+    def name(self):
+        return 'Circle'
+
+
+class Square(GraphicObject):
+    @property
+    def name(self):
+        return 'Square'
+
+# __main__
+drawing = GraphicObject()
+#drawing._name = 'My Drawing'
+drawing.name = 'My Drawing'
+# Key line for Composite: we add a derived class object
+drawing.children.append(Square('Red'))
+drawing.children.append(Circle('Yellow'))
+
+group = GraphicObject()  # no name
+group.children.append(Circle('Blue'))
+group.children.append(Square('Blue'))
+# Key line for Composite: we add an object of the Composite class itself
+# creatiga nested structure
+drawing.children.append(group) # we are appending a group to it!
+
+# The composite pattern is used here!
+# With a simple print() that uses __str__
+# the complete tree structure consisting of leaf objects
+# and group/composite objects is traversed and printed!
+print(drawing)
+```
+
+### Example: Neural Networks
+
+This is a very interesting case of the Composite pattern in which a function/method that should work the same way for a scalar object (`Neuron`) and a collection of it (`NeuronLayer`), i.e., `connect_to`, is implemented in a bas class `Connectable` from which `Neuron` and `NeuronLayer` are derived. Additionally, we add `__iter__` to the scalar class (`Neuron`) so that it can be iterable in a for loop, as well as the collection (`NeuronLayer`).
+
+```python
+from abc import ABC
+from collections.abc import Iterable
+
+# A straightforward class for a Neuron
+# and a Neuron Layer
+class Neuron():
+    def __init__(self, name):
+        self.name = name
+        self.inputs = []
+        self.outputs = []
+
+    def connect_to(self, other):
+        self.outputs.append(other)
+        other.inputs.append(self)
+
+    def __str__(self):
+        return f'{self.name}, {len(self.inputs)} inputs, {len(self.outputs)} outputs'
+
+class NeuronLayer(list):
+    def __init__(self, name, count):
+        super().__init__()
+        self.name = name
+        for x in range(0, count):
+            self.append(Neuron(f'{name}-{x}'))
+
+    def __str__(self):
+        return f'{self.name} with {len(self)} neurons'
+    
+# However, this classes as they are defined
+# make it difficult to perform the following operations
+#   neuron1.connect_to(neuron2)
+#   neuron1.connect_to(layer1)
+#   layer1.connect_to(neuron2)
+#   layer1.connect_to(layer2)
+# 
+# That is difficult, because we would have to implement
+# different connect_to methods, where the types are checked.
+# Instead, we use the Composite pattern
+
+# We define this class _only_ to share the 
+# function connect_to with any other class which is inherited with it
+class Connectable(Iterable, ABC):
+    def connect_to(self, other):
+        if self == other: # cannot connect to yourself
+            return
+
+        for s in self:
+            for o in other:
+                s.outputs.append(o)
+                o.inputs.append(s)
+
+# Since Neuron is inherited from Connectable, 
+# it has the connect_to method!
+class Neuron(Connectable):
+    def __init__(self, name):
+        self.name = name
+        self.inputs = []
+        self.outputs = []
+
+    # With this function we turn a scalar value into a collection of 1
+    # We need it because connect_to expects a collection in the for-loop!
+    def __iter__(self):
+        yield self
+
+    def __str__(self):
+        return f'{self.name}, {len(self.inputs)} inputs, {len(self.outputs)} outputs'
+
+# Since NeuronLayer is inherited from Connectable, 
+# it has the connect_to method!
+class NeuronLayer(list, Connectable):
+    def __init__(self, name, count):
+        super().__init__()
+        self.name = name
+        for x in range(0, count):
+            self.append(Neuron(f'{name}-{x}'))
+
+    def __str__(self):
+        return f'{self.name} with {len(self)} neurons'
+
+# __main__
+
+neuron1 = Neuron('n1')
+neuron2 = Neuron('n2')
+layer1 = NeuronLayer('L1', 3)
+layer2 = NeuronLayer('L2', 4)
+
+neuron1.connect_to(neuron2)
+neuron1.connect_to(layer1)
+layer1.connect_to(neuron2)
+layer1.connect_to(layer2)
+
+print(neuron1)
+print(neuron2)
+print(layer1)
+print(layer2)
+```
 
 ## 4. Decorator
 
