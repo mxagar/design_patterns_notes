@@ -28,6 +28,9 @@ Table of Contents:
     - [Example: Geometric Shapes](#example-geometric-shapes)
     - [Example: Neural Networks](#example-neural-networks)
   - [4. Decorator](#4-decorator)
+    - [Functional Decorators in Python: `@time_it`](#functional-decorators-in-python-time_it)
+    - [(Classic) Class Decorator](#classic-class-decorator)
+    - [Dynamic Class Decorator: `FileWithLogging`](#dynamic-class-decorator-filewithlogging)
   - [5. Facade](#5-facade)
   - [6. Flyweight](#6-flyweight)
   - [7. Proxy](#7-proxy)
@@ -547,7 +550,195 @@ print(layer2)
 
 ## 4. Decorator
 
-TBD.
+With a Decorator we add behavior to a class/function without altering it itself or without inheriting it.
+
+Motivation:
+
+- We want to augment an object with additional functionality.
+- We don't want to break the Open-Close principle, and we don't want to alter any existing code.
+- We want to keep the new functionality separate (Single Responsibility Principle).
+- We need to be able to interact with existing structures.
+- We have 2 main options:
+  - Inherit from required object (if possible).
+  - Build a Decorator, which simply references the decorated object(s).
+
+Decorators in Python are built-in, but as rather as functional decorators, not as general purpose decorators, as defined in this section.
+
+### Functional Decorators in Python: `@time_it`
+
+```python
+import time
+
+# A (built-in) Python decorator is defined as a wrapper function
+# which takes a function as an argument
+# and an action is performed with that function
+def time_it(func):
+    def wrapper():
+        start = time.time()
+        result = func()
+        end = time.time()
+        print(f'{func.__name__} took {int((end-start)*1000)}ms')
+    return wrapper
+
+@time_it # equivalent: time_it(some_op())
+def some_op():
+    print('Starting op')
+    time.sleep(1)
+    print('We are done')
+    return 123
+
+# __main__
+# time_it(some_op)() # equivalent call
+some_op()
+```
+
+### (Classic) Class Decorator
+
+The folowing example shows the classic class decorator, which works by defining a class which takes an underlying object and extends it with decorating functionality. However, it has two major problems:
+
+- We loose access to the underlying object structure!
+- Nothing prevents us from using the decorator more than once, which is not correct!
+
+```python
+from abc import ABC, abstractmethod
+
+
+# Abstract class, to be inherited and implemented
+class Shape(ABC):
+    @abstractmethod
+    def __str__(self):
+        return ''
+
+# Concrete class 1
+class Circle(Shape):
+    def __init__(self, radius=0.0):
+        self.radius = radius
+
+    def resize(self, factor):
+        self.radius *= factor
+
+    def __str__(self):
+        return f'A circle of radius {self.radius}'
+
+# Concrete class 2
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+        
+    def resize(self, factor):
+        self.side *= factor
+
+    def __str__(self):
+        return f'A square with side {self.side}'
+
+# Decorator class 1
+# This is like a decorator because
+# we add color to any shape
+# IMPORTANT: ColoredShape is inherited from Shape!
+class ColoredShape(Shape):
+    def __init__(self, shape, color):
+        if isinstance(shape, ColoredShape):
+            raise Exception('Cannot apply ColoredDecorator twice')
+        self.shape = shape
+        self.color = color
+
+    def __str__(self):
+        return f'{self.shape} has the color {self.color}'
+
+# Decorator class 2
+# This is like a decorator because
+# we add transparency to any shape
+# IMPORTANT: TransparentShape is inherited from Shape!
+class TransparentShape(Shape):
+    def __init__(self, shape, transparency):
+        self.shape = shape
+        self.transparency = transparency
+
+    def __str__(self):
+        return f'{self.shape} has {self.transparency * 100.0}% transparency'
+
+# __main__
+circle = Circle(2)
+print(circle)
+
+# Since Circle is inherited from Shape
+# we can use it with ColoredShape!
+# This s like a decorator
+red_circle = ColoredShape(circle, "red")
+print(red_circle)
+
+# Since ColoredShape is inherited from Shape
+# we can use it with TransparentShape!
+# This is like a decorator
+red_half_transparent_square = TransparentShape(red_circle, 0.5)
+print(red_half_transparent_square)
+
+# PROBLEM #1: 
+# ColoredShape doesn't have resize(), as Circle and Square,
+# i.e., we cannot access the underlying object!
+red_circle.resize(3) # AttributeError!
+
+# PROBLEM #2:
+# Nothing prevents double application!
+mixed = ColoredShape(ColoredShape(Circle(3), 'red'), 'blue') # Exception!
+```
+
+### Dynamic Class Decorator: `FileWithLogging`
+
+Dynamic class decorators alleviate the major problem of the classic class decorators: the underlying object becomes inaccessible.
+
+In the following example, `FileWithLogging` is implemented, where a `File` object is passed as unique attribute; i.e., `FileWithLoging` is the decorator and it keeps a reference to the object it decorates: `File`. Then, the API of `File` is re-implemented inside `FileWithLogging` by adding extra logging functionalities. In that process, `File` is not really modified, but we build a wrapper around it.
+
+Thus, basically, the Decorator re-implements the complete class API by adding extra functionality. Note: maybe we don't need to re-implement the complete API, but the functions/methods we know we're going to use!
+
+```python
+class FileWithLogging:
+    def __init__(self, file):
+        self.file = file
+
+    def writelines(self, strings):
+        self.file.writelines(strings)
+        # This is the logging functionality we add
+        print(f'wrote {len(strings)} lines')
+
+    # So that it works, we need to overwrite all
+    # the methods of a file handler...
+    def __iter__(self):
+        return self.file.__iter__()
+
+    def __next__(self):
+        return self.file.__next__()
+
+    def __getattr__(self, item):
+        # We get the file object/attribute using __dict__
+        # because that way we don't rely on how it is implemented:
+        # If the file attribute in the FileWithLogging class 
+        # or its parent classes is implemented as a descriptor 
+        # (e.g., using property), the direct attribute access version 
+        # will invoke the descriptor's methods, 
+        # whereas the dictionary access version will not.
+        # Direct attribute access might be slightly slower 
+        # than dictionary access due to the additional steps 
+        # involved in the attribute lookup process,
+        # such as checking for descriptors. 
+        # However, this difference is usually negligible.
+        return getattr(self.__dict__['file'], item)
+
+    def __setattr__(self, key, value):
+        if key == 'file':
+            self.__dict__[key] = value
+        else:
+            setattr(self.__dict__['file'], key)
+
+    def __delattr__(self, item):
+        delattr(self.__dict__['file'], item)
+
+# __main__
+file = FileWithLogging(open('hello.txt', 'w'))
+file.writelines(['hello', 'world'])
+file.write('testing') # wrote 2 lines
+file.close()
+```
 
 ## 5. Facade
 
