@@ -222,7 +222,123 @@ print(hash(Line(Point(1, 1), Point(10, 10)))) # 99894889213
 
 ## 2. Bridge
 
-TBD.
+Bridges connect components together through abstractions:
+
+- A Bridge prevents a *Cartesian product* complexity explosion; example:
+  - Base class `ThreadScheduler`
+  - Can be pre-emptive or cooperative
+  - Can run on Windows or Unix
+  - We end-up having a 2x2 scenario: `WindowsPTS`, `UnixPTS`, `WindowsCTS`, `UnixCTS`
+  - So, for each new dimension with levels we add, the number of classes explode, since all the levels need to be combined.
+- The Bridge pattern avoids entity explosion.
+- We don't rely on inheritance as much, instead, we use **inheritance + aggregation**.
+
+Essentially, a Bridge is a mechanism that decouples an interface or abstraction (which can be a hierarchy) from an implementation (which can be another hierarchy), or in other words, it connects two hierarchies of different classes so that we don't need to performa Cartesian product of the class hierarchies. We can understand a Bridge as a stronger form of encapsulation.
+
+The downside of the Bridge pattern is often that we break the Open-Close SOLID principle with it. However, that's the price we need to pay to avoid complexity explosion. When the Open-Close principle is broken, we need to modify many classes every time we add a new one.
+
+```python
+# We want to ender Circles and Squares: Circle, Square
+# Each can be rendered in vector or raster form: Vector, Raster
+# We could define these renderers:
+# CircleVectorRender, CircleRasterRender, SquareVectorRender, SquareRasterRender
+# But that doesn't make sense, the complexity explodes!
+# To avoid that, we implement the Bridge pattern
+# HOWEVER: Note that we break the Open-Close principle!
+# That is the price we need to pay to avoid complexit explosion.
+# Since the Open-Close principle is broken, whenever we add a new Shape,
+# e.g., Triangle, we need to modify Renderer, VectorRenderer, RasterRenderer.
+from abc import ABC, abstractmethod
+
+# Abstract base class of the renderer
+class Renderer(ABC):
+    @abstractmethod
+    def render_circle(self, radius):
+        pass
+
+    @abstractmethod
+    def render_square(self, side):
+        pass
+
+# Vector Renderer inherits from base class and implements 2 shapes
+# However, note that the render_ functions don't take a class (Circle, Square)
+# but a parameter essential to defining the class (radius, side)!
+class VectorRenderer(Renderer):
+    def render_circle(self, radius):
+        print(f'Drawing a circle of radius {radius}')
+
+    def render_square(self, side):
+        print(f'Drawing a square of side {side}')
+
+# Raster Renderer inherits from base class and implements 2 shapes
+# However, note that the render_ functions don't take a class (Circle, Square)
+# but a parameter essential to defining the class (radius, side)!
+class RasterRenderer(Renderer):
+    def render_circle(self, radius):
+        print(f'Drawing pixels for circle of radius {radius}')
+
+    def render_square(self, side):
+        print(f'Drawing pixels for a square of side {side}')
+
+# THIS IS WHERE WE CREATE THE BRIDGE
+# In a base class Shape we pass the Renderer as dependency/parameter!
+# Then, we inherit concrete Shapes and each can take
+# a Vector/ResterRenderer, which contain the methods for plotting each shape!
+class Shape:
+    def __init__(self, renderer):
+        self.renderer = renderer
+
+    def draw(self): pass
+    def resize(self, factor): pass
+
+
+class Circle(Shape):
+    def __init__(self, renderer, radius):
+        super().__init__(renderer)
+        self.radius = radius
+
+    def draw(self):
+        self.renderer.render_circle(self.radius)
+
+    def resize(self, factor):
+        self.radius *= factor
+
+
+class Square(Shape):
+    def __init__(self, renderer, side):
+        super().__init__(renderer)
+        self.side = side
+
+    def draw(self):
+        self.renderer.render_square(self.side)
+
+    def resize(self, factor):
+        self.side *= factor
+
+# __main__
+raster = RasterRenderer()
+vector = VectorRenderer()
+
+circle = Circle(vector, 5)
+circle.draw()
+circle.resize(2)
+circle.draw()
+
+circle = Circle(raster, 5)
+circle.draw()
+circle.resize(2)
+circle.draw()
+
+square = Square(vector, 5)
+square.draw()
+square.resize(2)
+square.draw()
+
+square = Square(raster, 5)
+square.draw()
+square.resize(2)
+square.draw()
+```
 
 ## 3. Composite
 
