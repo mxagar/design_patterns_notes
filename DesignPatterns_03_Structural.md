@@ -35,6 +35,8 @@ Table of Contents:
     - [Example: Console as a Facade](#example-console-as-a-facade)
     - [Example: Home Theater Facade](#example-home-theater-facade)
   - [6. Flyweight](#6-flyweight)
+    - [Example: User Names](#example-user-names)
+    - [Example: Text Formatting](#example-text-formatting)
   - [7. Proxy](#7-proxy)
 
 ## 1. Adapter
@@ -929,7 +931,168 @@ home_theater.end_movie()
 
 ## 6. Flyweight
 
-TBD.
+The Flyweight design pattern is a space optimization technique, so it tries to save memory:
+
+- The goal is to avoid redundancy
+  - Example: image an online game with many users
+    - We have many users with identical first/last names
+    - It makes no sense to store same first/last name over and over again
+    - Instead, we store a list of names and then use references to that list
+  - Example: formatting text as bold/italic
+    - We don't want each character having a format
+    - Instead, we operate on, e.g., line ranges and apply format to them
+
+The Flyweight stores data of similar objects externally and makes an association via renferences; thanks to it we optimize our memory usage.
+
+### Example: User Names
+
+In this example, a list of all possible first and second names is created inside the `User` class, and when a user is created, references to the list are created instead of saving the entire names per user.
+
+NOTE: I think it can be better to use a dictionary instead of a list to store the names, because for every new user, we check in the list/collection is the name exists: in a dict, that's `O(1)`, in a list that's `O(n)`.
+
+```python
+import random
+import string
+import sys
+
+# Simple class without Flywheel
+# It's not very efficient!
+class User:
+    def __init__(self, name):
+        self.name = name
+
+# Class with Flywheel
+class UserFlywheel:
+    # This is a class-level (C++: static) variable
+    # shared among all UserFlywheel objects/instances
+    strings = []
+
+    def __init__(self, full_name):
+        # Check if s in strings; 
+        # if so return index, else insert and return index
+        def get_or_add(s):
+            if s in self.strings:
+                return self.strings.index(s)
+            else:
+                self.strings.append(s)
+                return len(self.strings)-1
+        # Full name: Name Surname
+        self.names = [get_or_add(x) for x in full_name.split(' ')]
+
+    def __str__(self):
+        return ' '.join([self.strings[x] for x in self.names])
+
+# Random name generator
+def random_string():
+    chars = string.ascii_lowercase
+    return ''.join([random.choice(chars) for x in range(8)])
+
+# __main__
+users = []
+
+# We create 100 first & last names
+first_names = [random_string() for x in range(100)]
+last_names = [random_string() for x in range(100)]
+
+for first in first_names:
+    for last in last_names:
+        users.append(User(f'{first} {last}'))
+
+u2 = UserFlywheel('Jim Jones')
+u3 = UserFlywheel('Frank Jones')
+print(u2.names)
+print(u3.names)
+print(UserFlywheel.strings)
+
+users2 = []
+
+for first in first_names:
+    for last in last_names:
+        users2.append(UserFlywheel(f'{first} {last}'))
+```
+
+### Example: Text Formatting
+
+In this example the text formatting case is shown. First, a brute-force/naive formatting class would require:
+
+- A plain text consisting of characters
+- For each formatting (bold, italic, etc.) a list of bools fo the same size as the number of characters in the plain text.
+
+The approach with the Flywheel, instead, creates a class `TextRange` which contains:
+
+- The start & end indices of a text range in the plain text.
+- A boolean flags for any formatting (bold, italic, etc.).
+
+Obviously, the Flywheel implementation is much more efficient!
+
+```python
+# Brute-force/naive formatting:
+# a flag for each character
+class FormattedText:
+    def __init__(self, plain_text):
+        self.plain_text = plain_text
+        self.caps = [False] * len(plain_text)
+
+    def capitalize(self, start, end):
+        for i in range(start, end):
+            self.caps[i] = True
+
+    def __str__(self):
+        result = []
+        for i in range(len(self.plain_text)):
+            c = self.plain_text[i]
+            result.append(c.upper() if self.caps[i] else c)
+        return ''.join(result)
+
+
+class BetterFormattedText:
+    def __init__(self, plain_text):
+        self.plain_text = plain_text
+        self.formatting = []
+
+    class TextRange:
+        def __init__(self, start, end, capitalize=False, bold=False, italic=False):
+            self.end = end
+            self.bold = bold
+            self.capitalize = capitalize
+            self.italic = italic
+            self.start = start
+
+        # is the position in this format range?
+        def covers(self, position):
+            return self.start <= position <= self.end
+
+    # create a range and return it so that users modify it
+    # adding formatting
+    def get_range(self, start, end):
+        range = self.TextRange(start, end)
+        self.formatting.append(range)
+        return range
+
+    def __str__(self):
+        result = []
+        for i in range(len(self.plain_text)):
+            c = self.plain_text[i]
+            for r in self.formatting:
+                if r.covers(i) and r.capitalize:
+                    c = c.upper()
+                if r.covers(i) and r.bold:
+                    pass
+                # ... here we would add more cases
+            result.append(c)
+        return ''.join(result)
+
+# __main__
+ft = FormattedText('This is a brave new world')
+ft.capitalize(10, 15)
+print(ft)
+
+bft = BetterFormattedText('This is a brave new world')
+bft.get_range(16, 19).capitalize = True
+print(bft)
+# This is a BRAVE new world
+# This is a brave NEW world
+```
 
 ## 7. Proxy
 
