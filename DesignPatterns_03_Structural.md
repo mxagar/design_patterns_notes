@@ -32,6 +32,8 @@ Table of Contents:
     - [(Classic) Class Decorator](#classic-class-decorator)
     - [Dynamic Class Decorator: `FileWithLogging`](#dynamic-class-decorator-filewithlogging)
   - [5. Facade](#5-facade)
+    - [Example: Console as a Facade](#example-console-as-a-facade)
+    - [Example: Home Theater Facade](#example-home-theater-facade)
   - [6. Flyweight](#6-flyweight)
   - [7. Proxy](#7-proxy)
 
@@ -742,7 +744,188 @@ file.close()
 
 ## 5. Facade
 
-TBD.
+Facades are used to expose several components (e.g., a large, sophisticated body of code) through a single easy-to-use and easy-to-understand interface:
+
+- We want to balance complexity and presentation/usability.
+- Example: Typical home
+  - Many subsystems: electrical, sanitation, etc.
+  - Complex internal structure: floor layers, etc.
+  - BUT: End-user is not exposed to those internals
+- Same for happens Software!
+  - We have many systems working to provide flexibility, but...
+  - API onsumer want it to *just work*...
+
+The idea is to combine high-level and low-level APIs:
+
+- The high-level API is the go-to for most users and it simplifies may components working together. This high-level API exposition is the Facade!
+- Simultaneously, advanced users can use the low-level APIs of the components of the entire system. That would make sense for debugging or developing new features.
+  
+### Example: Console as a Facade
+
+The Console (CLI) can be viewed as a Facade: 
+
+- We have Buffers: areas of memory which contain the characters we're going to print.
+- We have Viewports: views of that Buffer, which show a chunk of all the content.
+- We have the Console class, which allows easy manipulation = This is our Facade!
+
+```python
+class Buffer:
+    def __init__(self, width=30, height=20):
+        self.width = width
+        self.height = height
+        self.buffer = [' '] * (width*height) # empty
+
+    # Indexing: get character
+    def __getitem__(self, item):
+        return self.buffer.__getitem__(item)
+
+    # Write into the buffer
+    def write(self, text):
+        text_list = [char for char in text]
+        #self.buffer += text_list
+        self.buffer += text
+
+
+# View to a chunk of a Buffer
+class Viewport:
+    def __init__(self, buffer=Buffer()):
+        self.buffer = buffer
+        self.offset = 0
+
+    def get_char_at(self, index):
+        return self.buffer[self.offset+index]
+
+    def append(self, text):
+        text_list = [char for char in text]
+        #self.buffer += text_list
+        self.buffer += text
+
+
+# Facade
+class Console:
+    def __init__(self):
+        b = Buffer()
+        self.current_viewport = Viewport(b)
+        self.buffers = [b]
+        self.viewports = [self.current_viewport]
+
+    # high-level
+    def write(self, text):
+        self.current_viewport.buffer.write(text)
+
+    # low-level
+    def get_char_at(self, index):
+        return self.current_viewport.get_char_at(index)
+
+# __main__
+c = Console()
+c.write('hello')
+c.write(', how are you?')
+ch = c.get_char_at(1)
+print(ch)
+print(c.buffers[0].buffer)
+```
+
+### Example: Home Theater Facade
+
+Let's imagine we have a home theater system with multiple components: a DVD player, a projector, and an amplifier. Each component has its own interface with various methods to control it. The Facade will provide a simple interface to control the entire system.
+
+- **Components**: Each component (`DVDPlayer`, `Projector`, `Amplifier`) has its own methods to control it.
+- **Facade**: The `HomeTheaterFacade` class provides a simplified interface to control the home theater system.
+  - `watch_movie(movie)`: Turns on the DVD player, starts the movie, turns on the projector in widescreen mode, and turns on the amplifier with the volume set to 5.
+  - `end_movie()`: Stops and ejects the DVD, and turns off all the components.
+
+By using the Facade pattern, we can control the complex subsystem (home theater components) with a simple interface provided by the `HomeTheaterFacade` class. This makes it easier to use the system without needing to interact with each component individually.
+
+```python
+class DVDPlayer:
+    def on(self):
+        print("DVD Player is on")
+
+    def off(self):
+        print("DVD Player is off")
+
+    def play(self, movie):
+        print(f"Playing movie '{movie}'")
+
+    def stop(self):
+        print("Stopping movie")
+
+    def eject(self):
+        print("Ejecting DVD")
+
+class Projector:
+    def on(self):
+        print("Projector is on")
+
+    def off(self):
+        print("Projector is off")
+
+    def wide_screen_mode(self):
+        print("Projector in widescreen mode")
+
+class Amplifier:
+    def on(self):
+        print("Amplifier is on")
+
+    def off(self):
+        print("Amplifier is off")
+
+    def set_volume(self, level):
+        print(f"Amplifier volume set to {level}")
+
+
+class HomeTheaterFacade:
+    def __init__(self, dvd_player, projector, amplifier):
+        self.dvd_player = dvd_player
+        self.projector = projector
+        self.amplifier = amplifier
+
+    def watch_movie(self, movie):
+        print("Get ready to watch a movie...")
+        self.dvd_player.on()
+        self.dvd_player.play(movie)
+        self.projector.on()
+        self.projector.wide_screen_mode()
+        self.amplifier.on()
+        self.amplifier.set_volume(5)
+
+    def end_movie(self):
+        print("Shutting down the home theater system...")
+        self.dvd_player.stop()
+        self.dvd_player.eject()
+        self.dvd_player.off()
+        self.projector.off()
+        self.amplifier.off()
+
+# Create the components
+dvd = DVDPlayer()
+projector = Projector()
+amplifier = Amplifier()
+
+# Create the facade
+home_theater = HomeTheaterFacade(dvd, projector, amplifier)
+
+# Use the facade to watch a movie
+home_theater.watch_movie("Inception")
+
+# Use the facade to end the movie
+home_theater.end_movie()
+
+# Get ready to watch a movie...
+# DVD Player is on
+# Playing movie 'Inception'
+# Projector is on
+# Projector in widescreen mode
+# Amplifier is on
+# Amplifier volume set to 5
+# Shutting down the home theater system...
+# Stopping movie
+# Ejecting DVD
+# DVD Player is off
+# Projector is off
+# Amplifier is off
+```
 
 ## 6. Flyweight
 
