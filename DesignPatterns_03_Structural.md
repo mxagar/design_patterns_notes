@@ -38,6 +38,8 @@ Table of Contents:
     - [Example: User Names](#example-user-names)
     - [Example: Text Formatting](#example-text-formatting)
   - [7. Proxy](#7-proxy)
+    - [Protection Proxy: Access Control](#protection-proxy-access-control)
+    - [Virtual Proxy](#virtual-proxy)
 
 ## 1. Adapter
 
@@ -1096,5 +1098,125 @@ print(bft)
 
 ## 7. Proxy
 
-TBD.
+A Proxy is a class that functions as an interface for accessing a particular resource. That resource might be remote, expensive to construct, may require logging or some other added functionality, etc. So there are many types of Proxies.
 
+Motivation:
+
+- Image we call `foo.Bar()`
+- This assumes that `foo` is in the same process as `Bar()`
+- What if later on you'd like to put `foo`-related operations into a separate process?
+  - Can we avoid changing our code?
+- That's what the Proxy is for
+  - We have the same interface, but entirely a different behavior
+- The example above is *Communication Proxy*, but there are many more Proxy types:
+  - *Logging Proxy, Virtual Proxy, Guarding Proxy, ...*
+
+A Proxy looks very similar to a Decorator, but there are some differences:
+
+- Proxies provide an identical interface, while Decorators provide an enhanced interface.
+- The Decorator typically aggregates (or has reference to) to what it is decorating; proxies don't have to: a Proxy might be working on an object which has not been materialized/instantiated. That happens with `LazyProxy` classes, as shown in the second example.
+
+### Protection Proxy: Access Control
+
+```python
+# We define a Car that can drive
+# but which requires a Driver for that
+class Car:
+    def __init__(self, driver):
+        self.driver = driver
+
+    def drive(self):
+        print(f'Car being driven by {self.driver.name}')
+
+
+class Driver:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+# __main__
+car = Car(Driver('John', 20))
+car.drive() # Car being driven by John
+
+# Now let's say we want age control
+# Changing the Car class break the Open-Close principle
+# so we implement a Proxy!
+# The Proxy is a wraper which creates a Car class
+# and checks the Driver age outside
+# without changing the Car class
+class CarProxy:
+    def __init__(self, driver):
+        self.driver = driver
+        self.car = Car(driver)
+
+    def drive(self):
+        if self.driver.age >= 16:
+            self.car.drive()
+        else:
+            print('Driver too young')
+
+# __main__
+car = CarProxy(Driver('John', 12))
+car.drive() # Driver too young
+```
+
+### Virtual Proxy
+
+A Virtual Proxy appears to be the underlying object, but it's not: it can behave differently and offer additional functionality.
+
+```python
+class Bitmap:
+    def __init__(self, filename):
+        self.filename = filename
+        # Now, we would load the image...
+        print(f'Loading image from {filename}...')
+
+    def draw(self):
+        #
+        print(f'Drawing image {self.filename}')
+
+
+def draw_image(image):
+    print('About to draw image...')
+    image.draw()
+    print('Done drawing image')
+
+# __main__
+# Let's image we open an image
+# and then we use the draw_image function to draw in it.
+# This has a problem: every time we instantiate Bitmap
+# the image is loaded, which can be expensive and memory consuming.
+# Maybe, we want to load the image iff we need to perform
+# an operation with it, e.g., draw on it!
+# Therefore, we define a Proxy LazyBitmap, which does that!
+bmp = Bitmap('facepalm.jpg')  # Bitmap
+draw_image(bmp)
+# Loading image from facepalm.jpg...
+# About to draw image...
+# Drawing image facepalm.jpg
+# Done drawing image
+
+# LazyBItmap is a wrapper around Bitmap
+# which instantiates Bitmap iff it's not done yet 
+# and we want to draw on it.
+# This structure abstracts Bitmap, however complex it is.
+# Thanks to this Proxy, the loading only happens once
+# and only when it is necessary.
+class LazyBitmap:
+    def __init__(self, filename):
+        self.filename = filename
+        self._bitmap = None
+
+    def draw(self):
+        if not self._bitmap:
+            self._bitmap = Bitmap(self.filename)
+        self._bitmap.draw()
+
+# __main__
+bmp = LazyBitmap('facepalm.jpg')  # Bitmap
+draw_image(bmp)
+# About to draw image...
+# Loading image from facepalm.jpg...
+# Drawing image facepalm.jpg
+# Done drawing image
+```
