@@ -25,6 +25,7 @@ Table of Contents:
     - [Lexing](#lexing)
     - [Parsing](#parsing)
   - [Iterator](#iterator)
+  - [Mediator](#mediator)
 
 ## 1. Chain of Responsibility
 
@@ -541,4 +542,90 @@ for x in root:
 
 for y in traverse_in_order(root):
     print(y.value)
+```
+
+## Mediator
+
+The Mediator facilitates communication between different components without them necessarily being aware of each other or having direct (reference) access to each other.
+
+- Components may go in and out of a system at any time. For instance:
+  - Chatroom participants
+  - Players in an online game
+- It makes no sense for rthem to have direct reference to one another
+  - Because those references may go dead
+- Solution: we can have them all refer to some central component that facilitates communication, i.e., the Mediator.
+
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
+Two examples ae shown in the notebook:
+
+- A chatroom (summarized here).
+- A game with events.
+
+```python
+class Person:
+    def __init__(self, name):
+        self.name = name
+        self.chat_log = []
+        self.room = None
+
+    def receive(self, sender, message):
+        s = f'{sender}: {message}'
+        print(f'[{self.name}\'s chat session] {s}')
+        self.chat_log.append(s)
+
+    def say(self, message):
+        self.room.broadcast(self.name, message)
+
+    def private_message(self, who, message):
+        self.room.message(self.name, who, message)
+
+# This is our Mediator,
+# since it allows private and broadcasting messages
+class ChatRoom:
+    def __init__(self):
+        self.people = []
+
+    # Broadcast = message to all
+    # We should send a message to everybody
+    # except the source
+    # We traverse all users and make them receive()
+    # the message
+    def broadcast(self, source, message):
+        for p in self.people:
+            if p.name != source:
+                p.receive(source, message)
+
+    def join(self, person):
+        join_msg = f'{person.name} joins the chat'
+        self.broadcast('room', join_msg)
+        person.room = self
+        self.people.append(person)
+
+    # Message = message to one specififc person
+    # We traverse all users and make _only_
+    # the specific user receive()
+    # the message
+    def message(self, source, destination, message):
+        for p in self.people:
+            if p.name == destination:
+                p.receive(source, message)
+
+# __main__
+room = ChatRoom()
+
+john = Person('John')
+jane = Person('Jane')
+
+room.join(john)
+room.join(jane)
+
+john.say('hi room')
+jane.say('oh, hey john')
+
+simon = Person('Simon')
+room.join(simon)
+simon.say('hi everyone!')
+
+jane.private_message('Simon', 'glad you could join us!')
 ```
