@@ -22,6 +22,8 @@ Table of Contents:
   - [1. Chain of Responsibility](#1-chain-of-responsibility)
   - [Command](#command)
   - [Interpreter](#interpreter)
+    - [Lexing](#lexing)
+    - [Parsing](#parsing)
 
 ## 1. Chain of Responsibility
 
@@ -278,3 +280,153 @@ print('After undo:', ba)
 
 ## Interpreter
 
+The Interpreter is related to the processing that text requires to interpret what to do with it:
+
+- Textual input needs to be processed; e.g., code turned in to OOP structures (compilers).
+- Some examples:
+  - Programming language compilers, interpreters and IDEs.
+  - HTML, XML, and similar
+  - Numeric expressions (`3 + 4/5`)
+  - Regular expressions
+
+Often, the processing is done to obtain structured meaning. To that end:
+
+- We separate it into lexical tokens (*lexing*)
+- and then interpret the resulting sequences (*parsing*).
+
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
+In the provided example numeric expressions with `+` and `-` operations are processed with an interpreter.
+
+### Lexing
+
+In this section, we separate the input string into a sequence of known tokens. That's called *lexing*.
+
+```python
+from enum import Enum, auto
+
+
+class Token:
+    # Class-level enum
+    class Type(Enum):
+        INTEGER = auto()
+        PLUS = auto()
+        MINUS = auto()
+        LPAREN = auto() # (
+        RPAREN = auto() # )
+
+    def __init__(self, type, text):
+        self.type = type
+        self.text = text
+
+    def __str__(self):
+        return f'`{self.text}`'
+
+
+# Lexing
+def lex(input):
+    result = []
+
+    i = 0
+    while i < len(input):
+        if input[i] == '+':
+            result.append(Token(Token.Type.PLUS, '+'))
+        elif input[i] == '-':
+            result.append(Token(Token.Type.MINUS, '-'))
+        elif input[i] == '(':
+            result.append(Token(Token.Type.LPAREN, '('))
+        elif input[i] == ')':
+            result.append(Token(Token.Type.RPAREN, ')'))
+        else:  # must be a number
+            digits = [input[i]]
+            for j in range(i + 1, len(input)):
+                if input[j].isdigit():
+                    digits.append(input[j])
+                    i += 1
+                else:
+                    result.append(Token(Token.Type.INTEGER,
+                                        ''.join(digits)))
+                    break
+        i += 1
+
+    return result
+```
+
+### Parsing
+
+In this section, we take the sequence of tokens and interpret their meaning, aka. *parsing*.
+
+```python
+class Integer:
+    def __init__(self, value):
+        self.value = value
+
+
+class BinaryOperation:
+    class Type(Enum):
+        ADDITION = 0
+        SUBTRACTION = 1
+
+    def __init__(self):
+        self.type = None
+        self.left = None
+        self.right = None
+
+    @property
+    def value(self):
+        if self.type == self.Type.ADDITION:
+            return self.left.value + self.right.value
+        elif self.type == self.Type.SUBTRACTION:
+            return self.left.value - self.right.value
+
+
+def parse(tokens):
+    result = BinaryOperation()
+    have_lhs = False # left-hand-side
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+
+        if token.type == Token.Type.INTEGER:
+            integer = Integer(int(token.text))
+            if not have_lhs:
+                result.left = integer
+                have_lhs = True
+            else:
+                result.right = integer
+        elif token.type == Token.Type.PLUS:
+            result.type = BinaryOperation.Type.ADDITION
+        elif token.type == Token.Type.MINUS:
+            result.type = BinaryOperation.Type.SUBTRACTION
+        elif token.type == Token.Type.LPAREN:  # note: no if for RPAREN
+            j = i
+            while j < len(tokens):
+                if tokens[j].type == Token.Type.RPAREN:
+                    break
+                j += 1
+            # preprocess subexpression
+            subexpression = tokens[i + 1:j]
+            element = parse(subexpression)
+            if not have_lhs:
+                result.left = element
+                have_lhs = True
+            else:
+                result.right = element
+            i = j  # advance
+        i += 1
+    return result
+
+def eval(input):
+    tokens = lex(input)
+    print(' '.join(map(str, tokens)))
+
+    parsed = parse(tokens)
+    print(f'{input} = {parsed.value}')
+
+# __main__
+eval('(13+4)-(12+1)')
+eval('1+(3-4)')
+
+# this won't work
+eval('1+2+(3-4)')
+```
