@@ -554,6 +554,11 @@ The Mediator facilitates communication between different components without them
 - It makes no sense for rthem to have direct reference to one another
   - Because those references may go dead
 - Solution: we can have them all refer to some central component that facilitates communication, i.e., the Mediator.
+  - All components in the system refer to the Mediator.
+  - The Mediator engages in bidirectional communication with its connected components.
+  - The Mediator has functions that the components can call.
+  - The components have functions that the Mediator can call.
+  - We can also work with events.
 
 Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
 
@@ -628,4 +633,13 @@ room.join(simon)
 simon.say('hi everyone!')
 
 jane.private_message('Simon', 'glad you could join us!')
+
+# [John's chat session] room: Jane joins the chat
+# [Jane's chat session] John: hi room
+# [John's chat session] Jane: oh, hey john
+# [John's chat session] room: Simon joins the chat
+# [Jane's chat session] room: Simon joins the chat
+# [John's chat session] Simon: hi everyone!
+# [Jane's chat session] Simon: hi everyone!
+# [Simon's chat session] Jane: glad you could join us!
 ```
