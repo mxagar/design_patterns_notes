@@ -20,6 +20,8 @@ Table of Contents:
 
 - [Design Patterns: Behavioral Patterns](#design-patterns-behavioral-patterns)
   - [1. Chain of Responsibility](#1-chain-of-responsibility)
+  - [Command](#command)
+  - [Interpreter](#interpreter)
 
 ## 1. Chain of Responsibility
 
@@ -150,4 +152,129 @@ for issue in issues:
 # Issue: expert - Response: ExpertSupport: Handling expert issue
 # Issue: unknown - Response: No handler available for this issue
 ```
+
+## Command
+
+A Command is an object which represents an instruction to perform a particular action; it contains all the information necessary for the action to be taken.
+
+- Ordinary statements are perishable:
+  - They cannot undo member assignment:
+  - They cannot directly serialize a sequence of actions (calls).
+- We want an object that represents an operation.
+  - Example: `person` should change its `age` to value `22`; the operation not only happens, but it is recoded it happened, along with who ordered it.
+  - Example: `car` should `start()`.
+- There are many uses for Commands: GUI commands, multi-level undo/redo, macro recording, and more!
+
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
+There are two examples in the notebook:
+
+- A Command applied to a bank account.
+- The same example, but with Composite Command, aka. Macro.
+
+Bank account example:
+
+```python
+from abc import ABC, abstractmethod
+from enum import Enum
+
+# Bank account class
+# This class works nicely
+# but we'd like to add the undo option
+# for the opreations described in it.
+# We can do that with a ledger/record.
+# We can do that with a Command, too.
+class BankAccount:
+    OVERDRAFT_LIMIT = -500
+
+    def __init__(self, balance=0):
+        self.balance = balance
+
+    def deposit(self, amount):
+        self.balance += amount
+        print(f'Deposited {amount}, balance = {self.balance}')
+
+    def withdraw(self, amount):
+        if self.balance - amount >= BankAccount.OVERDRAFT_LIMIT:
+            self.balance -= amount
+            print(f'Withdrew {amount}, balance = {self.balance}')
+            # We need to return if it succeeded to avoid illegal operations
+            return True
+        return False
+
+    def __str__(self):
+        return f'Balance = {self.balance}'
+
+
+# Optional, not necessary, but good pratice
+class Command(ABC):
+    # We could also use __call__, but invoke is more explicit
+    @abstractmethod
+    def invoke(self):
+        pass
+
+    @abstractmethod
+    def undo(self):
+        pass
+
+
+# This Command class is a wrapper for the BankAccount
+# which adds the Command functionality.
+# The action on the BankAccount is not performed instantaneously
+# but when we invoke() it.
+# Additionally, we can undo the action.
+class BankAccountCommand(Command):
+    def __init__(self, account, action, amount):
+        self.amount = amount
+        self.action = action
+        self.account = account
+        self.success = None
+
+    class Action(Enum):
+        DEPOSIT = 0
+        WITHDRAW = 1
+
+    def invoke(self):
+        if self.action == self.Action.DEPOSIT:
+            self.account.deposit(self.amount)
+            self.success = True
+        elif self.action == self.Action.WITHDRAW:
+            self.success = self.account.withdraw(self.amount)
+
+    def undo(self):
+        # To avoid illegal operations:
+        # if the operation wasn't successful, don't allow undo
+        if not self.success:
+            return
+        # Strictly speaking this is not correct
+        # (you don't undo a deposit by withdrawing)
+        # but it works for this demo, so...
+        if self.action == self.Action.DEPOSIT:
+            self.account.withdraw(self.amount)
+        elif self.action == self.Action.WITHDRAW:
+            self.account.deposit(self.amount)
+
+# __main__
+ba = BankAccount()
+cmd = BankAccountCommand(ba, BankAccountCommand.Action.DEPOSIT, 100)
+cmd.invoke()
+print('After $100 deposit:', ba)
+
+cmd.undo()
+print('$100 deposit undone:', ba)
+
+illegal_cmd = BankAccountCommand(ba, BankAccountCommand.Action.WITHDRAW, 1000)
+illegal_cmd.invoke()
+print('After impossible withdrawal:', ba)
+illegal_cmd.undo()
+print('After undo:', ba)
+# Deposited 100, balance = 100
+# After $100 deposit: Balance = 100
+# Withdrew 100, balance = 0
+# $100 deposit undone: Balance = 0
+# After impossible withdrawal: Balance = 0
+# After undo: Balance = 0
+```
+
+## Interpreter
 
