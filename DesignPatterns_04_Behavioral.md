@@ -24,6 +24,7 @@ Table of Contents:
   - [Interpreter](#interpreter)
     - [Lexing](#lexing)
     - [Parsing](#parsing)
+  - [Iterator](#iterator)
 
 ## 1. Chain of Responsibility
 
@@ -429,4 +430,115 @@ eval('1+(3-4)')
 
 # this won't work
 eval('1+2+(3-4)')
+```
+
+## Iterator
+
+- Iteration (traversal) is a core functionality of various data structures; note that some data structures (like trees) don't have a straightforward iteration process.
+- An iterator is a class that facilitates the traversal
+  - Keeps a reference to the current element.
+  - Knows how to move to a different element.
+- The iterator protocol requires:
+  - `__iter__()` to expose the iterator, which uses
+  - `__next__()` to return each of the iterated elements or
+  - `raise StopIteration` when it's done.
+- In Python, we have the keyword `token` which makes iteration very easy.
+
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
+The example in the notebook shows the Iterator of a Binary Tree:
+
+```python
+class Node:
+    def __init__(self, value, left=None, right=None):
+        self.right = right
+        self.left = left
+        self.value = value
+
+        self.parent = None
+
+        if left:
+            self.left.parent = self
+        if right:
+            self.right.parent = self
+
+    # We expose the tree/Node with __iter__
+    def __iter__(self):
+        # We use the Iterator we want here
+        return InOrderIterator(self)
+
+# Recall we can perform 3 traversals in a tree
+#       1
+#     /   \
+#    2     3
+# in-order: 2-1-3 (we implement only this one)
+# pre-order: 1-2-3
+# post-order: 2-3-1
+class InOrderIterator:
+    def __init__(self, root):
+        self.root = self.current = root
+        self.yielded_start = False
+        while self.current.left:
+            self.current = self.current.left
+
+    # This is a tricky implementation of in-order
+    def __next__(self):
+        if not self.yielded_start:
+            self.yielded_start = True
+            return self.current
+
+        if self.current.right:
+            self.current = self.current.right
+            while self.current.left:
+                self.current = self.current.left
+            return self.current
+        else:
+            p = self.current.parent
+            while p and self.current == p.right:
+                self.current = p
+                p = p.parent
+            self.current = p
+            if self.current:
+                return self.current
+            else:
+              raise StopIteration
+
+def traverse_in_order(root):
+    # This is the usual implementation of in-order
+    # It leverages the use of yield
+    def traverse(current):
+        if current.left:
+            for left in traverse(current.left):
+                yield left
+        yield current
+        if current.right:
+            for right in traverse(current.right):
+                yield right
+    for node in traverse(root):
+        yield node
+
+
+# __main__
+
+# Recall we can perform 3 traversals in a tree
+#       1
+#     /   \
+#    2     3
+# in-order: 2-1-3 (we implement only this one)
+# pre-order: 1-2-3
+# post-order: 2-3-1
+root = Node(1,
+            Node(2),
+            Node(3))
+
+# We can iterate with iter and next
+it = iter(root)
+print([next(it).value for x in range(3)])
+
+# Or, since we have __iter__, in a loop
+for x in root:
+    print(x.value)
+
+for y in traverse_in_order(root):
+    print(y.value)
 ```
