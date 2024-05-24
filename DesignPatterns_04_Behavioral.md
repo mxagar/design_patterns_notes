@@ -26,6 +26,9 @@ Table of Contents:
     - [Parsing](#parsing)
   - [Iterator](#iterator)
   - [Mediator](#mediator)
+  - [Memento](#memento)
+    - [Example: Bank Account](#example-bank-account)
+    - [Example: Bank Account with Undo and Redo](#example-bank-account-with-undo-and-redo)
 
 ## 1. Chain of Responsibility
 
@@ -642,4 +645,129 @@ jane.private_message('Simon', 'glad you could join us!')
 # [John's chat session] Simon: hi everyone!
 # [Jane's chat session] Simon: hi everyone!
 # [Simon's chat session] Jane: glad you could join us!
+```
+
+## Memento
+
+- An object or a system can go through several changes.
+  - Example: a bank account gets deposits and withdrawals.
+- There are different ways of navigating those changes.
+  - One way is to record every change (Command) and teach a command to *undo* itself.
+  - Another is to simply save snapshots of the system = Memento.
+- The Memento pattern is a token/handle class representing the system state.
+  - It lets us roll back to the state when the token was generated.
+  - It may or may not expose state information.
+
+So, basically, the Memento pattern is like a history, i.e., a list of all states along the time. Whenever we perform a change, a state is saved so that we can go back/forth in the history of object states.
+
+### Example: Bank Account
+
+In this example, for every deposit we do in a bank account, a Memento (state = balance) object is returned. Given a Memento of a bank account, we can restore that bank account with the state of the Memento.
+
+```python
+# We could call it BanckAccountSnapshot
+# In this simple example, the state is just the balance
+class Memento:
+    def __init__(self, balance):
+        self.balance = balance
+
+
+class BankAccount:
+    def __init__(self, balance=0):
+        self.balance = balance
+
+    def deposit(self, amount):
+        self.balance += amount
+        return Memento(self.balance)
+
+    def restore(self, memento):
+        self.balance = memento.balance
+
+    def __str__(self):
+        return f'Balance = {self.balance}'
+
+# __main__
+ba = BankAccount(100)
+m1 = ba.deposit(50)
+m2 = ba.deposit(25)
+print(ba)
+
+# restore to m1
+ba.restore(m1)
+print(ba)
+
+# restore to m2
+ba.restore(m2)
+print(ba)
+# Balance = 175
+# Balance = 150
+# Balance = 175
+```
+
+### Example: Bank Account with Undo and Redo
+
+This example builds on the previous one. We build a list of all the changes (a list of Mementos) in the bank account.
+
+```python
+class Memento:
+    def __init__(self, balance):
+        self.balance = balance
+
+
+class BankAccount:
+    def __init__(self, balance=0):
+        self.balance = balance
+        self.changes = [Memento(self.balance)] # our history
+        self.current = 0 # index where we are in changes
+
+    def deposit(self, amount):
+        self.balance += amount
+        m = Memento(self.balance)
+        self.changes.append(m)
+        self.current += 1
+        return m
+
+    def restore(self, memento):
+        if memento:
+            self.balance = memento.balance
+            self.changes.append(memento)
+            self.current = len(self.changes)-1
+
+    def undo(self):
+        # We go back one step in history/changes
+        if self.current > 0:
+            self.current -= 1
+            m = self.changes[self.current]
+            self.balance = m.balance
+            return m
+        return None
+
+    def redo(self):
+        # We go one step forward in history/changes
+        if self.current + 1 < len(self.changes):
+            self.current += 1
+            m = self.changes[self.current]
+            self.balance = m.balance
+            return m
+        return None
+
+    def __str__(self):
+        return f'Balance = {self.balance}'
+
+# __main__
+ba = BankAccount(100)
+ba.deposit(50)
+ba.deposit(25)
+print(ba)
+
+ba.undo()
+print(f'Undo 1: {ba}')
+ba.undo()
+print(f'Undo 2: {ba}')
+ba.redo()
+print(f'Redo 1: {ba}')
+# Balance = 175
+# Undo 1: Balance = 150
+# Undo 2: Balance = 100
+# Redo 1: Balance = 150
 ```
