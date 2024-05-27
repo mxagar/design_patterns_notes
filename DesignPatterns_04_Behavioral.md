@@ -29,6 +29,7 @@ Table of Contents:
   - [Memento](#memento)
     - [Example: Bank Account](#example-bank-account)
     - [Example: Bank Account with Undo and Redo](#example-bank-account-with-undo-and-redo)
+  - [Observer](#observer)
 
 ## 1. Chain of Responsibility
 
@@ -771,3 +772,6 @@ print(f'Redo 1: {ba}')
 # Undo 2: Balance = 100
 # Redo 1: Balance = 150
 ```
+
+## Observer
+
