@@ -30,6 +30,9 @@ Table of Contents:
     - [Example: Bank Account](#example-bank-account)
     - [Example: Bank Account with Undo and Redo](#example-bank-account-with-undo-and-redo)
   - [Observer](#observer)
+    - [Events](#events)
+    - [Property Observers](#property-observers)
+    - [Property Dependencies](#property-dependencies)
 
 ## 1. Chain of Responsibility
 
@@ -775,3 +778,224 @@ print(f'Redo 1: {ba}')
 
 ## Observer
 
+The Observer is probably the most common pattern.
+
+- We need to be informed when certain things happen
+  - Object's property changes
+  - Object does something
+  - Some external event occurs
+- We want to listen to those events and we want to be notified when they occur
+  - Notifications should include useful data
+- We want to unsubscribe from events we're no longer interested in
+
+The Observer is an object that wishes to be informed about events happening in the system. The entity generating the events is an *observable*.
+
+One common use-case is when a class property changes; we can use Python `@property.setter` decorator to invoke callable `Event` objects, which consist of lists of functions which are run when an event occurs.
+
+Also, note that:
+
+- In general, the Observer is an intrusive approach, i.e., the observable must provide an event to subscribe to.
+- Subscription and unsubscription is handled with addition/removal of items in a list.
+- Property change notifications are easy, but when properties depend on others, notifications start to be a bit more tricky: the dependent properties must be handled in the `@property.setter` of the main/original attribute that affects all ohers.
+
+### Events
+
+In this approach to implement an Observer we define an `Event` class derived from `list` which collects callable functions, which are kind of subscribers. In the example, a `Person` is defined with and `Event` type/class for the occasion when he/she falls ill. When that occurs, all the callable subscribers (i.e., functions) from the `Event` are called.
+
+```python
+# We have a Person class
+# We want an Event to occur, we one Person falls ill
+class Person:
+    def __init__(self, name, address):
+        self.name = name
+        self.address = address
+        self.falls_ill = Event()
+
+    def catch_a_cold(self):
+        self.falls_ill(self.name, self.address)
+
+
+# In the Event class, we have subscribers
+class Event(list):
+    def __call__(self, *args, **kwargs):
+        for item in self:
+            item(*args, **kwargs)
+
+
+def call_doctor(name, address):
+    print(f'A doctor has been called to {address}')
+
+
+# __main__
+person = Person('Sherlock', '221B Baker St')
+
+# Here, we're accessing Event,
+# which is a list of items!
+# Each item is a function
+# which can be called!
+# Here, the callable items just print something
+# but similarly, they could perform other tasks,
+# e.g., send an email!
+person.falls_ill.append(lambda name, addr: print(f'{name} is ill'))
+person.falls_ill.append(call_doctor)
+
+# We call the functions by calling the Event
+# which is a list of functions = subscribers
+person.catch_a_cold()
+
+# And we can remove subscriptions too
+person.falls_ill.remove(call_doctor)
+# So only one callable item = subscriber = function is run
+person.catch_a_cold()
+
+# Sherlock is ill
+# A doctor has been called to 221B Baker St
+# Sherlock is ill
+```
+
+### Property Observers
+
+This example shows how the changes in class attributes can be notified by using the `@property` decorator in Python. Basically, the same `Event` class as before is used via the `@property.setter`.
+
+```python
+class Event(list):
+    def __call__(self, *args, **kwargs):
+        for item in self:
+            item(*args, **kwargs)
+
+
+# Base class which contains an Event class instance
+# Person is derived from it!
+class PropertyObservable:
+    def __init__(self):
+        self.property_changed = Event()
+
+
+# Person is derived from the Observer
+# so that we have the Events baked in
+class Person(PropertyObservable):
+    def __init__(self, age=0):
+        super().__init__()
+        self._age = age
+
+    @property
+    def age(self):
+        return self._age
+
+    # In the property setter
+    # we trigger the Event
+    # which is related to changes in
+    # the age attribute
+    @age.setter
+    def age(self, value):
+        if self._age == value:
+            return
+        self._age = value
+        self.property_changed('age', value)
+
+
+# This class uses the Observer
+# to check when people can drive
+class TrafficAuthority:
+    def __init__(self, person):
+        self.person = person
+        person.property_changed.append(self.person_changed)
+
+    def person_changed(self, name, value):
+        if name == 'age':
+            if value < 16:
+                print('Sorry, you still cannot drive')
+            else:
+                print('Okay, you can drive now')
+                self.person.property_changed.remove(self.person_changed)
+
+# __main__
+p = Person()
+ta = TrafficAuthority(p)
+for age in range(14, 20):
+    print(f'Setting age to {age}')
+    p.age = age
+
+# Setting age to 14
+# Sorry, you still cannot drive
+# Setting age to 15
+# Sorry, you still cannot drive
+# Setting age to 16
+# Okay, you can drive now
+# Setting age to 17
+# Setting age to 18
+# Setting age to 19
+```
+
+### Property Dependencies
+
+Property Observers can face difficulties when properties are dependent among them. This example shows how to solve those cases.
+
+```python
+class Event(list):
+    def __call__(self, *args, **kwargs):
+        for item in self:
+            item(*args, **kwargs)
+
+
+class PropertyObservable:
+    def __init__(self):
+        self.property_changed = Event()
+
+
+class Person(PropertyObservable):
+    def __init__(self, age=0):
+        super().__init__()
+        self._age = age
+
+    # We add a boolean property to denote whether a Person can vote
+    # which clearly depends on the age
+    @property
+    def can_vote(self):
+        return self._age >= 18
+
+    @property
+    def age(self):
+        return self._age
+
+    # The original property from which the dependent ones
+    # hand needs to be modified:
+    # We track when the dependent properties change
+    # and notify the observer via the Event function calls
+    @age.setter
+    def age(self, value):
+        if self._age == value:
+            return
+
+        # We cash the old can_vote
+        old_can_vote = self.can_vote
+
+        self._age = value
+        self.property_changed('age', value)
+
+        # If the new can_vote is different than the old
+        # then, we notify the observer
+        if old_can_vote != self.can_vote:
+            self.property_changed('can_vote', self.can_vote)
+
+# __main__
+def person_changed(name, value):
+    if name == 'can_vote':
+        print(f'Voting status changed to {value}')
+
+p = Person()
+p.property_changed.append(
+    person_changed
+)
+
+for age in range(16, 21):
+    print(f'Changing age to {age}')
+    p.age = age
+
+# Changing age to 16
+# Changing age to 17
+# Changing age to 18
+# Voting status changed to True
+# Changing age to 19
+# Changing age to 20
+```
