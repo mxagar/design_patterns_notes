@@ -168,9 +168,15 @@ Similarly, this repository assumes you have practical experience in Object-Orien
   - Methods
   - Special methods (*dunder*): `__init__`, `__repr__`, `__str__`, `__call__`, `__getitem__`, `__setitem__`, `__enter__`, `__exit__`, etc.
 - Encapsulation: public and private data and methods, grouped together; properties, getters and setters.
-- Inheritance: classes (children) derived from other classes (parents); `is-a` relationships.
-  - `super()`: It gets the parent class of the class and it's often used to call its special methods, e.g., teh constructor `__init__()`. If the class was not inherited, it implicitly inherits from `object`, so the call doesn't raise an error.
-- Composition: complex objects built using other objects; class built using other classes, i.e. `has-a` relationships.
+- OOP relationships:
+  - **Inheritance**: classes (children) derived from other classes (parents); `is-a` relationships.
+    - `super()`: It gets the parent class of the class and it's often used to call its special methods, e.g., teh constructor `__init__()`. If the class was not inherited, it implicitly inherits from `object`, so the call doesn't raise an error.
+  - **Composition**: complex objects built using other objects; class built using other classes, i.e. `has-a` relationships. We can often choose between *inheritance* and *composition*, depending on what we'd like to have:
+    - inheritance: reuse of common logic, clear hierarchy relationships.
+    - composition: flexibility, reduced coupling between classes.
+  - Aggregation: type of composition in which the components can exist on their own, e.g., `Team` and `Player` (component).
+  - Association: A general relationship where objects of one class are associated with objects of another class. This can be unidirectional or bidirectional. A `Customer` can be associated with multiple `Orders`.
+  - Dependency: one class depends on another class to function. This is typically represented by method parameters or local variables. Example: A `PaymentProcessor` class depends on a `PaymentMethod` class to process payments.
 - Mixin: we inherit a class from two, they allow for the implementation of specific functionalities to be shared across multiple classes.
 - Interfaces: classes with non-implemented methods, i.e., kind of contracts that define which methods should be implemented in the inherited classes. In Python, interfaces can be defined using abstract base classes (`from abc import ABC, abstractmethod`) with abstract methods, i.e., using `@abstractmethod`. An abstract method **needs** to be defined in the derived class, otherwise the `TypeError ` is raised at the moment we attempt to create an instance of the subclass.
 - Polymorfism: when a function accepts objects of different classes because they all come from the same parent class; ability of different types of objects to be treated as instances of the same class through inheritance.
