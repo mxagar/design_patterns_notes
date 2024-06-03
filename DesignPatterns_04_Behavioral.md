@@ -38,6 +38,8 @@ Table of Contents:
     - [Switch-Based State Machine](#switch-based-state-machine)
   - [Strategy](#strategy)
     - [Example: Text Processor](#example-text-processor)
+  - [Template Method](#template-method)
+    - [Example: Chess Game](#example-chess-game)
 
 ## 1. Chain of Responsibility
 
@@ -1176,6 +1178,8 @@ So, in summary, when we use Strategies:
 
 ### Example: Text Processor
 
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
 This example is a simple text processor which formats a list of bullet points to be in Markdown or HTML. The Strategy pattern is used to specify the low-level text foramtting of the list. That way, we define the high-level code and inject low-level Strategy objects, which are implemented somewhere else. In this case, the Strategy = Format (HTML/Markdown).
 
 ```python
@@ -1270,4 +1274,93 @@ print(tp)
 #   <li>bar</li>
 #   <li>baz</li>
 # </ul>
+```
+
+## Template Method
+
+A Template is a high-level blueprint for an algorithm to be completed by inheritors. In other words, it is equivalent to the Strategy method, but it's implemented via inheritance: it allows us to define the skeleton of the algorithm with concrete implementations defined in subclasses.
+
+- Algorithms can be decomposed into common parts (high-level) + specifics (low-level).
+- The Strategy pattern accomplishes the separation of high/low-level parts throuhg composition:
+  - High-level algorithm expects strateges to conform to an interface.
+  - Concrete implementations implement this interface and are used.
+- The Template Method pattern does the same thing as Strategy, but using inheritance
+  - The overall algorithm is defined in the base class; it uses abstract members.
+  - Inheritors override the abstract members.
+  - Template method invoked to get the work done.
+
+The Template Method is usually defined in the base class and not overriden in derived concrete classes; instead, the abstract methods used by it are overriden. That way, the high-level logic is already defined in the Template Method of the base class.
+
+### Example: Chess Game
+
+```python
+from abc import ABC
+
+
+# Our base class = our Skeleton
+# It defines the structure of any/many game/s
+class Game(ABC):
+
+    def __init__(self, number_of_players):
+        self.number_of_players = number_of_players
+        self.current_player = 0
+
+    # This is the Template Method!
+    def run(self):
+        self.start()
+        while not self.have_winner:
+            self.take_turn()
+        print(f'Player {self.winning_player} wins!')
+
+    def start(self): pass
+
+    @property
+    def have_winner(self): pass
+
+    def take_turn(self): pass
+
+    @property
+    def winning_player(self): pass
+
+
+# This is our inherited class.
+# We won't override our Template Method (run)
+# but instead, all the other methods used 
+# by it: have_winner, take_turn, winning_player
+class Chess(Game):
+    def __init__(self):
+        super().__init__(2)
+        self.max_turns = 10
+        self.turn = 1
+
+    def start(self):
+        print(f'Starting a game of chess with {self.number_of_players} players.')
+
+    @property
+    def have_winner(self):
+        return self.turn == self.max_turns
+
+    def take_turn(self):
+        print(f'Turn {self.turn} taken by player {self.current_player}')
+        self.turn += 1
+        self.current_player = 1 - self.current_player
+
+    @property
+    def winning_player(self):
+        return self.current_player
+
+# __main__
+chess = Chess()
+chess.run()
+# Starting a game of chess with 2 players.
+# Turn 1 taken by player 0
+# Turn 2 taken by player 1
+# Turn 3 taken by player 0
+# Turn 4 taken by player 1
+# Turn 5 taken by player 0
+# Turn 6 taken by player 1
+# Turn 7 taken by player 0
+# Turn 8 taken by player 1
+# Turn 9 taken by player 0
+# Player 1 wins!
 ```
