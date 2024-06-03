@@ -33,6 +33,9 @@ Table of Contents:
     - [Events](#events)
     - [Property Observers](#property-observers)
     - [Property Dependencies](#property-dependencies)
+  - [State (Machine)](#state-machine)
+    - [Handmade State Machine](#handmade-state-machine)
+    - [Switch-Based State Machine](#switch-based-state-machine)
 
 ## 1. Chain of Responsibility
 
@@ -998,4 +1001,151 @@ for age in range(16, 21):
 # Voting status changed to True
 # Changing age to 19
 # Changing age to 20
+```
+
+## State (Machine)
+
+Consider an ordinary telephone:
+
+- What you do with it depends on the state of the phone/line
+  - If it's ringing or you want to make a call, you can pick it up.
+  - The phone must be off the hook to talk/make a call.
+  - If you try calling someone and it's busy, you put the handset down.
+- Changes in state can be explicit or in response to an event (Observer pattern).
+
+Following the telephone's analogy, the State is a pattern in which the object's behavior is determined by its state. An object transitions from one state to another (something needs to trigger that transition). A formalized construct which manages state and transitions is called a *(finite) state machine*.
+
+The best way of implementing State Machines is to define `State` and `Trigger` classes/enums:
+
+- We define all possible `States`.
+- We define all possible events or `Triggers` that can occur.
+- We map to each `State` the `Trigger` events that can apply to them and to which `State` they transition when they occur.
+- Everything can be packed into a `while` loop where each `State`-`Trigger` pair is checked, and we can sophisticate the logic as we please:
+  - Define entry/exit `States`.
+  - Gaurd conditions for enabling/disabling transitions.
+  - Default action when no transitions are found for an event/`Trigger`.
+
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
+### Handmade State Machine
+
+In this example a phone call is modeled with a State Machine. `State` and `Trigger` `Enums` are defined and a `rules` dictionary which maps each current `State` to all possible `(Trigger, NewState)` pairs. Then, we check in a loop the `Trigger` for the current `State` and perform a State Transition associated with each `Trigger`.
+
+```python
+from enum import Enum, auto
+
+
+class State(Enum):
+    OFF_HOOK = auto() # handset lifted from the cradle = descolgado
+    CONNECTING = auto()
+    CONNECTED = auto()
+    ON_HOLD = auto()
+    ON_HOOK = auto() # handset placed on the cradle = colgado
+
+
+# Triggers are the things that cause the State transitions
+class Trigger(Enum):
+    CALL_DIALED = auto()
+    HUNG_UP = auto()
+    CALL_CONNECTED = auto()
+    PLACED_ON_HOLD = auto()
+    TAKEN_OFF_HOLD = auto()
+    LEFT_MESSAGE = auto()
+
+
+# __main__
+# Now for each State, we need to define which
+# Triggers would cause to transition to a new State
+# We have a list of pairs for each State:
+# (Trigger event, State we transition to)
+# Everything is packed in a dictionary Dict[State, List[Trigger, State]]
+rules = {
+    State.OFF_HOOK: [
+        (Trigger.CALL_DIALED, State.CONNECTING)
+    ],
+    State.CONNECTING: [
+        (Trigger.HUNG_UP, State.ON_HOOK),
+        (Trigger.CALL_CONNECTED, State.CONNECTED)
+    ],
+    State.CONNECTED: [
+        (Trigger.LEFT_MESSAGE, State.ON_HOOK),
+        (Trigger.HUNG_UP, State.ON_HOOK),
+        (Trigger.PLACED_ON_HOLD, State.ON_HOLD)
+    ],
+    State.ON_HOLD: [
+        (Trigger.TAKEN_OFF_HOLD, State.CONNECTED),
+        (Trigger.HUNG_UP, State.ON_HOOK)
+    ]
+}
+
+# Starting State: When the State Machine is initiated
+state = State.OFF_HOOK
+# Ending State; in some State Machines
+# exit_state does not occur, e.g., trading bots.
+# Here, as soon as a person sets the phone on hook
+# we are done!
+exit_state = State.ON_HOOK
+
+while state != exit_state:
+    print(f'The phone is currently {state}')
+
+    # Check all rules to find current state
+    for i in range(len(rules[state])):
+        t = rules[state][i][0]
+        print(f'{i}: {t}')
+
+    # Request Trigger input
+    idx = int(input('Select a trigger:'))
+    # Perform State Transiton with Trigger
+    s = rules[state][idx][1]
+    state = s
+
+print('We are done using the phone.')
+# We enter idx in List[] of rules[State], e.g. 0
+# The phone is currently State.OFF_HOOK
+# 0: Trigger.CALL_DIALED
+# The phone is currently State.CONNECTING
+# 0: Trigger.HUNG_UP
+# 1: Trigger.CALL_CONNECTED
+# We are done using the phone.
+```
+
+### Switch-Based State Machine
+
+In this example, the State Machine of a lock is implemented following the `switch`-based approach. Python doesn't have a `switch` statement, but we can imlement it using `if-else` or `dicts`.
+
+The advantage of this approach is that we just need to define only `State`, and all the transitions are handled in a `while`-loop. However, it works only for simple State Machines; in complex cases, it is better to define `Triggers` and transition `rules`, as done beforehand.
+
+```python
+from enum import Enum, auto
+
+
+class State(Enum):
+    LOCKED = auto()
+    FAILED = auto()
+    UNLOCKED = auto()
+
+
+# __main__
+code = '1234'
+state = State.LOCKED
+entry = ''
+
+while True:
+    if state == State.LOCKED:
+        entry += input(entry)
+
+        if entry == code:
+            state = State.UNLOCKED
+
+        if not code.startswith(entry):
+            # the code is wrong
+            state = State.FAILED
+    elif state == State.FAILED:
+        print('\nFAILED')
+        entry = ''
+        state = State.LOCKED
+    elif state == State.UNLOCKED:
+        print('\nUNLOCKED')
+        break
 ```
