@@ -36,6 +36,8 @@ Table of Contents:
   - [State (Machine)](#state-machine)
     - [Handmade State Machine](#handmade-state-machine)
     - [Switch-Based State Machine](#switch-based-state-machine)
+  - [Strategy](#strategy)
+    - [Example: Text Processor](#example-text-processor)
 
 ## 1. Chain of Responsibility
 
@@ -1148,4 +1150,124 @@ while True:
     elif state == State.UNLOCKED:
         print('\nUNLOCKED')
         break
+```
+
+## Strategy
+
+Many algorithms can be separated into two layers: high-level and low-level; while high-level deals with the overall goal, the low-level deals with the details. The Strategy makes use of that sepration and enables to select the exact behavior of a system at run-time.
+
+Example: the algorithm of making tea can be decomposed into:
+
+- the process of making a hot beverage (boil water, pout into a cut)
+- and tea-specific steps (put teabag into water, etc.)
+
+The high-level algorithm is the one which is reused and provided to the user (prepare hot beverage), who then adds/selects low-level parts (coffe, tea, hot chocolate). Each of the low-level options is called a Strategy, which supports specifics associated with the low-level option:
+
+- Tea-Strategy
+- Coffee-Strategy
+- Hot-chocolate-Strategy
+- etc.
+
+So, in summary, when we use Strategies:
+
+- We define an algorithm at a high level.
+- We define the interface we expect each Strategy to follow.
+- We provide for dynamic composition of Strategies in the resulting object.
+
+### Example: Text Processor
+
+This example is a simple text processor which formats a list of bullet points to be in Markdown or HTML. The Strategy pattern is used to specify the low-level text foramtting of the list. That way, we define the high-level code and inject low-level Strategy objects, which are implemented somewhere else. In this case, the Strategy = Format (HTML/Markdown).
+
+```python
+from abc import ABC
+from enum import Enum, auto
+
+
+class OutputFormat(Enum):
+    MARKDOWN = auto()
+    HTML = auto()
+
+
+# Abstract base class for all Strategies = Formats
+# Not required but a good idea
+class ListStrategy(ABC):
+    def start(self, buffer): pass
+    def end(self, buffer): pass
+    def add_list_item(self, buffer, item): pass
+
+
+# Markdown lists are very easy
+class MarkdownListStrategy(ListStrategy):
+
+    def add_list_item(self, buffer, item):
+        buffer.append(f' * {item}\n')
+
+
+# HTML lists are a bit more complicated
+# bacause they have start/end tags 
+# for both the complete list
+# and each item
+class HtmlListStrategy(ListStrategy):
+
+    def start(self, buffer):
+        buffer.append('<ul>\n')
+
+    def end(self, buffer):
+        buffer.append('</ul>\n')
+
+    def add_list_item(self, buffer, item):
+        buffer.append(f'  <li>{item}</li>\n')
+
+
+# This text processor is a high-level API
+# in which we can choose the low-level Strategy
+# i.e., the format, in this case
+class TextProcessor:
+    def __init__(self, list_strategy=HtmlListStrategy()):
+        self.buffer = [] # all the text goes here
+        self.list_strategy = list_strategy
+
+    # We add the items of a list, which are appended to the buffer
+    def append_list(self, items):
+        self.list_strategy.start(self.buffer)
+        for item in items:
+            self.list_strategy.add_list_item(
+                self.buffer, item
+            )
+        self.list_strategy.end(self.buffer)
+
+    # We set the format at the beginning
+    # which instantiates the desired Strategy = Format
+    def set_output_format(self, format):
+        if format == OutputFormat.MARKDOWN:
+            self.list_strategy = MarkdownListStrategy()
+        elif format == OutputFormat.HTML:
+            self.list_strategy = HtmlListStrategy()
+
+    def clear(self):
+        self.buffer.clear()
+
+    def __str__(self):
+        return ''.join(self.buffer)
+
+# __main__
+items = ['foo', 'bar', 'baz']
+
+tp = TextProcessor()
+tp.set_output_format(OutputFormat.MARKDOWN)
+tp.append_list(items)
+print(tp)
+#  * foo
+#  * bar
+#  * baz
+
+tp.set_output_format(OutputFormat.HTML)
+tp.clear()
+tp.append_list(items)
+print(tp)
+# <ul>
+#   <li>foo</li>
+#   <li>bar</li>
+#   <li>baz</li>
+# </ul>
 ```
