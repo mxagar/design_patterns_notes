@@ -177,6 +177,9 @@ Similarly, this repository assumes you have practical experience in Object-Orien
   - Aggregation: type of composition in which the components can exist on their own, e.g., `Team` and `Player` (component).
   - Association: A general relationship where objects of one class are associated with objects of another class. This can be unidirectional or bidirectional. A `Customer` can be associated with multiple `Orders`.
   - Dependency: one class depends on another class to function. This is typically represented by method parameters or local variables. Example: A `PaymentProcessor` class depends on a `PaymentMethod` class to process payments.
+- Overloading of functions or class methods (i.e., using the same function name with different arguments or argument types) is not possible in Python &mdash; in a straightforward way; however, we can use decorartors to simulate overloading:
+  - `@singledispatch` from `functools`.
+  - `@overload` from `typing`.
 - Mixin: we inherit a class from two, they allow for the implementation of specific functionalities to be shared across multiple classes.
 - Interfaces: classes with non-implemented methods, i.e., kind of contracts that define which methods should be implemented in the inherited classes. In Python, interfaces can be defined using abstract base classes (`from abc import ABC, abstractmethod`) with abstract methods, i.e., using `@abstractmethod`. An abstract method **needs** to be defined in the derived class, otherwise the `TypeError ` is raised at the moment we attempt to create an instance of the subclass.
 - Polymorfism: when a function accepts objects of different classes because they all come from the same parent class; ability of different types of objects to be treated as instances of the same class through inheritance.
@@ -260,6 +263,64 @@ class Department:
 
 dept = Department("HR")
 dept.add_employee(Employee("Jane Doe", "1234"))
+
+##### -- Overloading: functools.singledispatch
+
+from functools import singledispatch
+
+@singledispatch
+def func(val):
+    raise NotImplementedError
+
+@func.register
+def _(val: str):
+    print('This is a string')
+
+@func.register
+def _(val: int):
+    print('This is an int')
+
+func("test") # "This is a string"
+func(1)      # "This is an int"
+func(None)   # NotImplementedError
+
+##### -- Overloading: typing.overload
+
+from typing import overload
+
+@overload
+def process_data(data: str) -> str: ...
+
+
+@overload
+def process_data(data: int) -> int: ...
+
+
+@overload
+def process_data(data: float) -> TypeError: ...
+
+
+def process_data(data):
+    if isinstance(data, str):
+        # Implementation for str type input
+        return "Processed " + data
+    elif isinstance(data, int):
+        # Implementation for int type input
+        return data + 10
+    else:
+        raise TypeError("Invalid data type")
+
+
+# Function call with str type parameter and return type
+result1 = process_data("Hello")
+print(result1)  # Output: Processed Hello
+
+# Function call with int type parameter and return type
+result2 = process_data(5)
+print(result2)  # Output: 15
+
+# Function call with unsupported type parameter
+result3 = process_data(3.14)  # Raises TypeError
 
 
 ##### -- Mixin
