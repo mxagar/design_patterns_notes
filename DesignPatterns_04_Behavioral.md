@@ -40,6 +40,7 @@ Table of Contents:
     - [Example: Text Processor](#example-text-processor)
   - [Template Method](#template-method)
     - [Example: Chess Game](#example-chess-game)
+  - [Visitor](#visitor)
 
 ## 1. Chain of Responsibility
 
@@ -1291,6 +1292,8 @@ A Template is a high-level blueprint for an algorithm to be completed by inherit
 
 The Template Method is usually defined in the base class and not overriden in derived concrete classes; instead, the abstract methods used by it are overriden. That way, the high-level logic is already defined in the Template Method of the base class.
 
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
 ### Example: Chess Game
 
 ```python
@@ -1363,4 +1366,120 @@ chess.run()
 # Turn 8 taken by player 1
 # Turn 9 taken by player 0
 # Player 1 wins!
+```
+
+## Visitor
+
+Sometimes we need to define a new operation/bahavior on an entire class hierarchy (i.e., in several classes with a hierarchical dependency): that's exactly what the Visitor pattern makes possible.
+
+- Example: we want to make a document model printable to HTML/Markdown.
+- We don't want to keep modifying every class in the hierarchy.
+- We need access to the non-common aspects of classes in the hierarchy.
+- We create an external component to handle rendering.
+  - But we want to avoid explicit type checks.
+
+The Visitor is a components that knows how to traverse a data structure composed of (possibly related) types.
+
+Notebook: [`Behavioral_Patterns.ipynb`](./04_Behavioral_Patterns/Behavioral_Patterns.ipynb).
+
+Several examples are shown in the notebook:
+
+- Intrusive (Bad) Visitor
+- Reflective Visitor
+- Classic Visitor
+- Classic Visitor Refined
+
+Here, I summarize the **Reflective Visitor**. In the example we capture expressions like `1 + (2+3)` in Object-Oriented fashion:
+
+- We have left/right terms.
+- Each term can be an expression, too.
+- We want to print the complete expression.
+- We want to evaluate the complete expression.
+
+A class `ExpressionPrinter` is created which takes care of the printing: it contains the functionality in a separate class. The solution breaks the Open-Closed principle, because we need to create `M (print, eval) x N (DoubleExpression, AdditionExpession)` new classes which are modified every time we extend the functionalities, but it's still an enhancement compared to the original first example.
+
+This example, in addition, *injects* a `print()` function from `ExpressionPrinter` to an abstract base class `Expression`, which is used by the derived `DoubleExpression` and `AdditionExpression`.
+
+The example is called *reflective* because types need to be checked. From the [Wikipedia](https://en.wikipedia.org/wiki/Reflective_programming):
+
+> In computer science, reflective programming or reflection is the ability of a process to examine, introspect, and modify its own structure and behavior.
+
+See also the example with the **Classic Visitor**.
+
+```python
+from abc import ABC
+
+
+# We use this abstract base class to join
+# all Expression* classes in a hierarchy
+# Later (in ExpressionPrinter) we will
+# define a print() method shared among all
+# derived classes!
+class Expression(ABC):
+    pass
+
+
+# Note we derive the class from Expression
+class DoubleExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+
+# Note we derive the class from Expression
+class AdditionExpression(Expression):
+    def __init__(self, left, right):
+        self.right = right
+        self.left = left
+
+
+# This still breaks OCP 
+# because new types require M×N modifications.
+# If we add new types
+# we need to modify ExpressionPrinter.
+# If we add new operations (print, eval)
+# we need to reate anew class.
+class ExpressionPrinter:
+    # Static method = class-level method, 
+    # we don't need to instantiate a class object
+    @staticmethod
+    def print(e, buffer):
+        """ Will fail silently on a missing case. """
+        if isinstance(e, DoubleExpression):
+            buffer.append(str(e.value))
+        elif isinstance(e, AdditionExpression):
+            buffer.append('(')
+            ExpressionPrinter.print(e.left, buffer)
+            buffer.append('+')
+            ExpressionPrinter.print(e.right, buffer)
+            buffer.append(')')
+
+    # We (re-)define Expression.print in ExpressionPrinter
+    # so that we can call print() from DoubleExpression and AdditionExpression
+    # because the are inherited from Expression!
+    Expression.print = lambda self, b: ExpressionPrinter.print(self, b)
+
+# __main__
+# represents 1+(2+3)
+e = AdditionExpression(
+    DoubleExpression(1),
+    AdditionExpression(
+        DoubleExpression(2),
+        DoubleExpression(3)
+    )
+)
+
+buffer = []
+# print() is a static method = class-level method, 
+# we don't need to instantiate a class object
+ExpressionPrinter.print(e, buffer)
+print("ExpressionPrinter.print:", ''.join(buffer))
+
+# Since we inherited all Expression* from the ABC Expression
+# and we (re-)define Expression.print in ExpressionPrinter
+# we can still call print() from DoubleExpression and AdditionExpression
+# because the are inherited from Expression!
+buffer = []
+e.print(buffer)
+print("e.print:", ''.join(buffer))
+
 ```
