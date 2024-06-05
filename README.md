@@ -178,7 +178,7 @@ Similarly, this repository assumes you have practical experience in Object-Orien
   - Association: A general relationship where objects of one class are associated with objects of another class. This can be unidirectional or bidirectional. A `Customer` can be associated with multiple `Orders`.
   - Dependency: one class depends on another class to function. This is typically represented by method parameters or local variables. Example: A `PaymentProcessor` class depends on a `PaymentMethod` class to process payments.
 - Overloading of functions or class methods (i.e., using the same function name with different arguments or argument types) is not possible in Python &mdash; in a straightforward way; however, we can use decorartors to simulate overloading:
-  - `@singledispatch` from `functools`.
+  - `@singledispatch` and `@singledispatchmethod` from `functools`.
   - `@overload` from `typing`.
 - Mixin: we inherit a class from two, they allow for the implementation of specific functionalities to be shared across multiple classes.
 - Interfaces: classes with non-implemented methods, i.e., kind of contracts that define which methods should be implemented in the inherited classes. In Python, interfaces can be defined using abstract base classes (`from abc import ABC, abstractmethod`) with abstract methods, i.e., using `@abstractmethod`. An abstract method **needs** to be defined in the derived class, otherwise the `TypeError ` is raised at the moment we attempt to create an instance of the subclass.
@@ -264,9 +264,8 @@ class Department:
 dept = Department("HR")
 dept.add_employee(Employee("Jane Doe", "1234"))
 
-##### -- Overloading: functools.singledispatch
-
-from functools import singledispatch
+##### -- Overloading: functools.singledispatch and singledispatchmethod
+from functools import singledispatch, singledispatchmethod
 
 @singledispatch
 def func(val):
@@ -284,6 +283,24 @@ func("test") # "This is a string"
 func(1)      # "This is an int"
 func(None)   # NotImplementedError
 
+class MyClass:
+    @singledispatchmethod
+    def do_something(self, value):
+        raise NotImplementedError("Unsupported type")
+
+    @do_something.register
+    def _(self, value: str):
+        return f"Concatenated string: {value + value}"
+
+    @do_something.register
+    def _(self, value: int):
+        return f"Sum of integers: {value + value}"
+
+# Example usage
+obj = MyClass()
+print(obj.do_something("Hello"))  # Output: Concatenated string: HelloHello
+print(obj.do_something(5))        # Output: Sum of integers: 10
+
 ##### -- Overloading: typing.overload
 
 from typing import overload
@@ -291,14 +308,11 @@ from typing import overload
 @overload
 def process_data(data: str) -> str: ...
 
-
 @overload
 def process_data(data: int) -> int: ...
 
-
 @overload
 def process_data(data: float) -> TypeError: ...
-
 
 def process_data(data):
     if isinstance(data, str):
@@ -309,7 +323,6 @@ def process_data(data):
         return data + 10
     else:
         raise TypeError("Invalid data type")
-
 
 # Function call with str type parameter and return type
 result1 = process_data("Hello")
