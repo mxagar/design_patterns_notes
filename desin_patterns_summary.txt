@@ -1,0 +1,73 @@
+## Creational Patterns
+
+Builder
+	Build class objects step-wise.
+
+Factories
+	Custom instantiation of children class objects (with concrete parameters, etc.).
+
+Prototype
+	Instantiate a class object by copying/cloning an instance, because it's easier than instantiating one from scratch.
+
+Singleton
+	Garantee we'll have one object instance of a class (e.g., a DB).
+
+
+## Structural Patterns
+
+Adapter
+	Transform one class object into another class object.
+
+Bridge
+	Classes with specific functionalities are injected to avoid cartessian product explosion (e.g., vector/pixel graphics, circle/square shape, renderer class).
+
+Composite
+	Treat single/collection objects uniformly; e.g., Neuron and NeuronLayer.
+
+Decorator
+	Extend a function/class with wrapping functionality.
+
+Facade
+	Hide implementation with easy interface; e.g., MediaPlayer, DVDPlayer, etc. all are Players.
+
+Flyweight
+	Space optimization; example: save Names and Surnames as lists an refer to their items in a class/DB field.
+
+Proxy
+	A Virtual Proxy appears to be the underlying object, but it's not: it can behave differently and offer additional functionality. Example: lazy loaders.
+
+
+## Behavioral Patterns
+
+Chain of Responsibility
+	It allows an object to pass a request along a chain of potential handlers until the request is handled (e.g., a support request object passed to first, second and third level support handlers).
+
+Command
+	Object which represents an instruction to perform a particular action, also to undo it.
+
+Interpreter
+	The processing that text requires to interpret what to do with it.
+
+Iterator
+	In Python, the __iter__() magic/dunder method is the implementation of the idea behind this pattern.
+
+Mediator
+	It facilitates the communication between different components without them necessarily being aware of each other or having direct (reference) access to each other. For instance, ChatRoom and Person: we can broadcast from the ChatRoom whos enters/exits the chat.
+
+Memento
+	Snapshots of a system state; saving the history of states, we can go back (e.g., in a Bank class, the balance is the state: Memento.balance).
+
+Observer
+	The Observer is an object that wishes to be informed about events happening in the system. The entity generating the events is an observable: property changes, actions, events, etc. Events can be called in property getters/setters.
+
+State Machine
+	Finite state machine.
+
+Strategy
+	Distinguish low-level and high-level processes of similar tasks and implement them separately; for instance: hot beverage (high level) vs. tea strategy (low level), or coffee, chocolate.
+
+Template Method
+	High-level blueprint for an algorithm/class to be completed/redefined by inheritors; e.g.: Game, ChessGame, they both have play() or other similar methods implemented differently in each.
+
+Visitor
+	Define a new operation/bahavior on an entire class hierarchy (i.e., in several classes with a hierarchical dependency).

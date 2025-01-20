@@ -27,7 +27,9 @@ The notes are divided into the following documents:
 - [`DesignPatterns_03_Structural.md`](DesignPatterns_03_Structural.md)
 - [`DesignPatterns_04_Behavioral.md`](DesignPatterns_04_Behavioral.md)
 
-And the code with examples is located in their corresponding folders:
+And the co-located file [`desin_patterns_summary.txt`](./desin_patterns_summary.txt) is a summary of all the design patterns.
+
+The code with examples is located in their corresponding folders:
 
 - [`01_SOLID/`](01_SOLID)
 - [`02_Creational_Patterns/`](02_Creational_Patterns)
