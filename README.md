@@ -151,9 +151,53 @@ target_link_libraries(main ${Boost_LIBRARIES})
 
 ### Python
 
-No preliminary installations needed; concrete installations introduced in specific example explanations, if needed.
+Use [uv](https://docs.astral.sh/uv/getting-started/installation/) to manage the
+Python environment. Install uv using the instructions at that link, then run
+these commands from the root of this repository:
 
-I use `conda` environments.
+```bash
+uv sync --locked
+```
+
+`uv sync --locked` creates `.venv` automatically and installs the dependencies
+from `uv.lock`, including the default `dev` group. The `.python-version` file
+selects Python 3.13; uv can download it if it is not installed. To create only
+the environment explicitly, run `uv venv` first, then `uv sync --locked` to
+install the dependencies.
+
+The Python scripts and code cells in the four notebooks currently import
+only Python standard-library modules, so no third-party runtime dependencies
+are required. The `dev` group provides JupyterLab and ipykernel for opening
+and running the notebooks. For scripts alone, use `uv sync --locked --no-dev`.
+
+Run scripts or launch JupyterLab without activating the environment:
+
+```bash
+uv run python design_patterns_notes/01_SOLID/ocp.py
+uv run jupyter lab design_patterns_notes
+```
+
+Alternatively, activate the environment to use `python` and `jupyter` directly.
+On Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+On macOS/Linux with bash or zsh:
+
+```bash
+source .venv/bin/activate
+```
+
+Run `deactivate` to leave the activated environment.
+
+To add a dependency, run `uv add <package>` (or `uv add --dev <package>` for
+development tools). These commands update both `pyproject.toml` and `uv.lock`.
+Commit both files when dependencies change; keep `.venv` out of Git. After
+pulling dependency changes, run `uv sync --locked` again. See the
+[uv project guide](https://docs.astral.sh/uv/guides/projects/) for more details.
+
 
 ## Object Oriented Programming (OOP)
 
